@@ -518,6 +518,25 @@ HARDWARE_CATALOG = [
         "description": "Micro minero de Bitcoin de código abierto con 2 chips BM1370 de Bitmain (3nm). Consume solo 40W. Diseñado como minero de lotería en solitario (Solo Mining) para intentar cazar un bloque completo de Bitcoin (3.125 BTC)."
     },
     {
+        "id": "nerdqaxe_plus_rev6",
+        "name": "NerdQaxe++ Rev 6.1 (6.0 TH/s, Quad-BM1370)",
+        "manufacturer": "Open Source / SoloBlock (NerdQaxe)",
+        "algorithm": "SHA-256",
+        "coin_id": "bitcoin",
+        "target_coin": "BTC",
+        "hashrate": 6.0,
+        "hashrate_unit": "TH/s",
+        "hashrate_hs": 6.0 * 1e12,
+        "power_watts": 105,
+        "efficiency": "16.5 J/TH",
+        "hardware_cost_usd": 360,
+        "release_year": 2025,
+        "noise_db": 32,
+        "type": "Minero Doméstico Silencioso",
+        "daily_revenue_base_usd": 0.405,
+        "description": "NerdQaxe++ Rev 6.1 actualizado para Solo Mining de Bitcoin con 6.0 TH/s. Equipado con 4 chips BM1370 de 3nm (Antminer S21), eficiencia de 16.5 J/TH y consumo de solo 105W. Cuenta con refrigeración silenciosa de doble ventilador (32 dB), conexión WiFi 2.4G, pantalla LCD a color y firmware AxeOS de código abierto (Amazon: https://www.amazon.com/-/es/dp/B0GKY8MWRL)."
+    },
+    {
         "id": "lucky_miner_lv08_pro",
         "name": "Lucky Miner LV08 Pro (7.0 TH/s, BM1368)",
         "manufacturer": "Lucky Miner",
@@ -729,6 +748,22 @@ LUCKY_MINERS_CATALOG = [
         "badge": "🥇 Máxima Potencia en Mineros Caseros (7.0 TH/s)",
         "pros": "Máxima potencia bruta para minería de lotería de escritorio (7.0 TH/s). Chip BM1368 de 4nm con 21.4 J/TH, fuente integrada de 100-240V, WiFi y puerto Ethernet.",
         "cons": "Consumo de 150W (costo de luz de ~S/ 92/mes en Casa Grande), requiere buena ventilación ambiente."
+    },
+    {
+        "id": "nerdqaxe_plus_rev6",
+        "name": "NerdQaxe++ Rev 6.1 (6.0 TH/s)",
+        "brand": "Open Source (NerdQaxe / SoloBlock)",
+        "chip": "4x BM1370 (3nm Bitmain - Antminer S21)",
+        "hashrate_th": 6.0,
+        "hashrate_display": "6.0 TH/s (6,000 GH/s)",
+        "power_watts": 105,
+        "efficiency_j_th": 16.5,
+        "hardware_cost_usd": 360,
+        "noise_db": 32,
+        "connectivity": "WiFi 2.4GHz + Pantalla Color LCD + AxeOS + Doble Ventilador",
+        "badge": "🚀 6.0 TH/s Quad-BM1370 de Alta Eficiencia (16.5 J/TH @ 105W)",
+        "pros": "Gran potencia de 6.0 TH/s con arquitectura de 4 chips BM1370 de 3nm. Máxima eficiencia energética de 16.5 J/TH consumiendo solo 105W, doble ventilador silencioso de bajo ruido (32 dB), WiFi 2.4G y firmware AxeOS de código abierto.",
+        "cons": "Consumo de 105W (~S/ 64.50/mes de luz en Casa Grande) y costo inicial de ~$360 USD por sus 4 chips de 3nm."
     },
     {
         "id": "lucky_miner_lv08_pro_5t",
@@ -954,6 +989,27 @@ ALT_LUCKY_MINERS_CATALOG = [
         "coin_price_usd_default": 430.0,
         "badge": "🎯 7.1% PROBABILIDAD ANUAL EN BCH (1 en 14 años)",
         "description": "7.0 TH/s apuntados a Bitcoin Cash. Con la red BCH teniendo 140 veces menos competencia que Bitcoin, tu probabilidad anual sube a más del 7.1% (1 en 14 años) de cazar un bloque completo de 3.125 BCH (~$1,350 USD / S/ 5,000 Soles) en solitario."
+    },
+    {
+        "id": "nerdqaxe_plus_bch_solo",
+        "name": "NerdQaxe++ Rev 6.1 (en Bitcoin Cash BCH)",
+        "target_coin": "Bitcoin Cash (BCH)",
+        "coin_id": "bitcoin-cash",
+        "coin_symbol": "BCH",
+        "algorithm": "SHA-256",
+        "hardware_type": "NerdQaxe++ Rev 6.1 (Compatible)",
+        "hashrate_display": "6.0 TH/s",
+        "hashrate_hs": 6.0 * 1e12,
+        "power_watts": 105,
+        "hardware_cost_usd": 360,
+        "noise_db": 32,
+        "network_hashrate_hs": 5.0 * 1e18, # 5 EH/s
+        "network_display": "5.0 EH/s",
+        "block_time_sec": 600,
+        "block_reward_coins": 3.125,
+        "coin_price_usd_default": 430.0,
+        "badge": "🎯 6.1% PROBABILIDAD ANUAL EN BCH (1 en 16.3 años)",
+        "description": "6.0 TH/s apuntados a la red Bitcoin Cash. Gracias a sus 4 chips BM1370 de 3nm con 16.5 J/TH y refrigeración de doble ventilador silencioso, tu probabilidad anual sube al ~6.1% (1 en 16.3 años) de cazar un bloque completo de 3.125 BCH (~$1,350 USD / S/ 5,000 Soles) en solitario."
     },
     {
         "id": "lucky_lv08_std_bch_solo",

@@ -98,6 +98,28 @@ def test_profitability_calculations():
     assert lv08_pro_hw["hashrate"] == 7.0
     assert lv08_pro_hw["power_watts"] == 150
 
+    # Verificación del modelo NerdQaxe++ Rev 6.1 en HARDWARE_CATALOG y LUCKY_MINERS_CATALOG
+    nerdqaxe_hw = next((m for m in HARDWARE_CATALOG if m["id"] == "nerdqaxe_plus_rev6"), None)
+    assert nerdqaxe_hw is not None, "NerdQaxe++ Rev 6.1 debe estar en HARDWARE_CATALOG"
+    assert nerdqaxe_hw["hashrate"] == 6.0
+    assert nerdqaxe_hw["power_watts"] == 105
+    assert nerdqaxe_hw["algorithm"] == "SHA-256"
+
+    nerdqaxe_btc = next((m for m in LUCKY_MINERS_CATALOG if m["id"] == "nerdqaxe_plus_rev6"), None)
+    assert nerdqaxe_btc is not None, "NerdQaxe++ Rev 6.1 debe estar en LUCKY_MINERS_CATALOG"
+    assert nerdqaxe_btc["hashrate_th"] == 6.0
+    assert nerdqaxe_btc["power_watts"] == 105
+    nerdqaxe_res = calculate_lucky_miner_odds(
+        hashrate_th=nerdqaxe_btc["hashrate_th"],
+        network_hashrate_eh=700.0,
+        power_watts=nerdqaxe_btc["power_watts"],
+        tariff_pen_kwh=0.8528,
+        usd_to_pen=3.75,
+        btc_price_usd=81000.0
+    )
+    assert nerdqaxe_res["odds_year"] > 0
+    assert nerdqaxe_res["monthly_power_pen"] > 0
+
     lv08_pro_btc = next((m for m in LUCKY_MINERS_CATALOG if m["id"] == "lucky_miner_lv08_pro"), None)
     assert lv08_pro_btc is not None, "Lucky Miner LV08 Pro debe estar en LUCKY_MINERS_CATALOG"
     assert lv08_pro_btc["hashrate_th"] == 7.0
@@ -129,6 +151,11 @@ def test_profitability_calculations():
     lv08_bch = next((m for m in ALT_LUCKY_MINERS_CATALOG if m["id"] == "lucky_lv08_std_bch_solo"), None)
     assert lv08_bch is not None, "Lucky Miner LV08 en BCH debe estar en ALT_LUCKY_MINERS_CATALOG"
     assert lv08_bch["power_watts"] == 120
+
+    nerdqaxe_bch = next((m for m in ALT_LUCKY_MINERS_CATALOG if m["id"] == "nerdqaxe_plus_bch_solo"), None)
+    assert nerdqaxe_bch is not None, "NerdQaxe++ Rev 6.1 en BCH debe estar en ALT_LUCKY_MINERS_CATALOG"
+    assert nerdqaxe_bch["power_watts"] == 105
+    assert nerdqaxe_bch["hashrate_hs"] == 6.0 * 1e12
     alt_res = calculate_alt_lucky_miner_odds(
         hardware_name="Bitaxe Gamma 602",
         target_coin="Bitcoin Cash",

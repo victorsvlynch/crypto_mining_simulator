@@ -22,7 +22,7 @@ Simulador técnico, financiero y probabilístico de minería de criptomonedas de
   - [4. ☀️ Análisis Eléctrico y Clima (Valle Chicama)](#4--análisis-eléctrico-y-clima-valle-chicama)
   - [5. 🎰 Mineros Lucky y Lotería Solo Mining (BTC y Altcoins)](#5--mineros-lucky-y-lotería-solo-mining-btc-y-altcoins)
   - [6. 📈 Mercado en Vivo, Oráculos y Modos de Minería](#6--mercado-en-vivo-oráculos-y-modos-de-minería)
-- [📋 Catálogo de Equipos de Minería (37 Modelos)](#-catálogo-de-equipos-de-minería-37-modelos)
+- [📋 Catálogo de Equipos de Minería (38 Modelos)](#-catálogo-de-equipos-de-minería-38-modelos)
 - [⚡ Matriz Energética de Casa Grande](#-matriz-energética-de-casa-grande)
 - [📐 Arquitectura y Diagramas Interactivos](#-arquitectura-y-diagramas-interactivos)
 - [🤖 Automatización Git y GitHub Actions](#-automatización-git-y-github-actions)
@@ -50,7 +50,7 @@ Este simulador resuelve esa problemática proporcionando:
 6. **Modelado de climatización (PUE):** Consumo adicional por disipación térmica y ventilación forzada en el clima cálido (22°C - 32°C) del Valle Chicama.
 7. **Resiliencia y envejecimiento:** Proyección a 36 meses con crecimiento de dificultad y Halving, cálculo de precio de apagado (Shutdown Price) y estrategia HODL vs Sell.
 8. **Ingeniería eléctrica y acústica:** Dimensionamiento según el Código Nacional de Electricidad (CNE/NEC) y diseño de cabina silenciadora (Noise Box).
-9. **Lotería Solo Mining:** Probabilidades estadísticas reales para micro mineros (Bitaxe, Lucky Miner, Avalon Nano) comparadas con loterías convencionales como La Tinka.
+9. **Lotería Solo Mining:** Probabilidades estadísticas reales para micro mineros (NerdQaxe++, Bitaxe, Lucky Miner, Avalon Nano) comparadas con loterías convencionales como La Tinka.
 10. **Oráculo de Datos Multi-Fuente en Cascada:** Conexión redundante a CoinGecko, Binance Public API, Coinpaprika y Mempool.space en vivo (hashrate de red superando los 1,000 EH/s y dificultad en 140+ T).
 11. **Exportabilidad Completa:** Descarga en un clic de archivos CSV/Excel del ranking general, proyecciones de flujo de caja y lista de materiales (BOM) solar.
 
@@ -61,13 +61,13 @@ Este simulador resuelve esa problemática proporcionando:
 La aplicación está organizada en 6 pestañas especializadas en la interfaz principal y una barra lateral de configuración regional:
 
 ### 1. 🏆 Ranking de Rentabilidad en Casa Grande
-- **Clasificación Automática:** Evalúa y ordena los 37 equipos del catálogo desde el más rentable hasta el de mayor pérdida neta mensual según la tarifa activa.
+- **Clasificación Automática:** Evalúa y ordena los 38 equipos del catálogo desde el más rentable hasta el de mayor pérdida neta mensual según la tarifa activa.
 - **Buscador y Filtros Dinámicos:** Búsqueda en vivo por nombre, chip (BM1366, BM1368, BM1370, etc.), fabricante, algoritmo o criptomoneda.
 - **Filtros de Segmento:** ASICs Industriales, Mineros Silenciosos / Domésticos, Micro Mineros / Lotería y Rigs de GPU.
 - **Visualización Gráfica:** Gráfico de barras interactivo de Plotly comparando Ingresos Brutos vs Costo de Electricidad vs Utilidad Neta Mensual.
 - **Tarifa Límite (Breakeven):** Determina el costo máximo en S/ y USD por kWh que tolera cada equipo antes de volverse deficitario.
 - **Comparador Cara a Cara (Head-to-Head):** Comparativa técnica y financiera lado a lado entre dos equipos cualesquiera con radar de eficiencia.
-- **Exportación de Datos:** Botón `📥 Exportar Excel/CSV` para descargar la tabla completa de los 37 mineros clasificados con formato UTF-8 compatible con Microsoft Excel.
+- **Exportación de Datos:** Botón `📥 Exportar Excel/CSV` para descargar la tabla completa de los 38 mineros clasificados con formato UTF-8 compatible con Microsoft Excel.
 
 ### 2. 🔍 Simulador Detallado de un Minero
 - **Análisis Profundo:** Selección de cualquier equipo o creación de un **Minero 100% Personalizado** (algoritmo, hashrate, potencia, costo de compra).
@@ -109,7 +109,7 @@ La aplicación está organizada en 6 pestañas especializadas en la interfaz pri
 
 ### 5. 🎰 Mineros Lucky y Lotería Solo Mining (BTC y Altcoins)
 - **Lotería Solo Mining de Bitcoin:**
-  - Modelado matemático de probabilidad para micro mineros (Bitaxe Gamma, Lucky Miner LV08, LV08 Pro, Bitforge Nano, Canaan Avalon Nano 3, NerdMiner).
+  - Modelado matemático de probabilidad para micro mineros (NerdQaxe++ Rev 6.1, Bitaxe Gamma, Lucky Miner LV08, LV08 Pro, Bitforge Nano, Canaan Avalon Nano 3, NerdMiner).
   - Probabilidad exacta de resolver un bloque válido en solitario con recompensa completa (**3.125 BTC + comisiones**, >$250,000 USD).
   - Comparativa de probabilidades anuales contra ganar el premio mayor de **La Tinka** en Perú (~1 en 45 millones).
 - **Lotería Solo Mining en Altcoins:**
@@ -117,7 +117,7 @@ La aplicación está organizada en 6 pestañas especializadas en la interfaz pri
 - **Simulador de Flota Multi-Dispositivo:**
   - Cálculo del hashrate agregado, consumo combinado y probabilidad estadística conjunta al operar múltiples micro mineros en simultáneo.
 - **Monitor de Telemetría Local:**
-  - Consulta en tiempo real del estado de mineros Bitaxe o Lucky Miner conectados en la red local WiFi vía API REST / JSON (AxeOS / ESP32).
+  - Consulta en tiempo real del estado de mineros NerdQaxe++, Bitaxe o Lucky Miner conectados en la red local WiFi vía API REST / JSON (AxeOS / ESP32).
 
 ### 6. 📈 Mercado en Vivo, Oráculos y Modos de Minería
 - **Oráculo Multi-Fuente Redundante en Cascada:**
@@ -132,9 +132,9 @@ La aplicación está organizada en 6 pestañas especializadas en la interfaz pri
 
 ---
 
-## 📋 Catálogo de Equipos de Minería (37 Modelos)
+## 📋 Catálogo de Equipos de Minería (38 Modelos)
 
-El simulador cuenta con una base de datos de 37 equipos debidamente parametrizados en [`data/hardware_db.py`](file:///L:/Streamlit/Crypto_Mining_Simulator/data/hardware_db.py):
+El simulador cuenta con una base de datos de 38 equipos debidamente parametrizados en [`data/hardware_db.py`](file:///L:/Streamlit/Crypto_Mining_Simulator/data/hardware_db.py):
 
 | # | Modelo | Fabricante | Algoritmo | Moneda | Hashrate | Consumo | Tipo / Perfil |
 | :-: | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -165,16 +165,17 @@ El simulador cuenta con una base de datos de 37 equipos debidamente parametrizad
 | 25 | **IceRiver AL0** | IceRiver | Blake3 | ALPH | 400.0 GH/s | 100 W | Micro Escritorio |
 | 26 | **Goldshell Mini-DOGE III** | Goldshell | Scrypt | LTC + DOGE | 700.0 MH/s | 400 W | Silencioso 35dB |
 | 27 | **Bitforge Nano Bitcoin Miner** | Bitforge | SHA-256 | BTC | 2.5 TH/s | 40 W | Lucky Miner USB |
-| 28 | **Lucky Miner LV08 Pro** | Lucky Miner | SHA-256 | BTC | 7.0 TH/s | 150 W | Lucky Miner (BM1368) |
-| 29 | **Lucky Miner LV08** | Lucky Miner | SHA-256 | BTC | 4.5 TH/s | 120 W | Lucky Miner (BM1366) |
-| 30 | **Bitaxe Gamma 602** | OpenSource | SHA-256 | BTC | 1.35 TH/s | 19 W | Micro Minero (BM1370) |
-| 31 | **Bitmain Antminer Z15 (Estándar)** | Bitmain | Equihash | ZEC | 420.0 KSol/s | 1510 W | ASIC Industrial |
-| 32 | **Bitmain Antminer X9** | Bitmain | RandomX | XMR | 1.0 MH/s | 2472 W | ASIC RandomX |
-| 33 | **Bitmain Antminer S19 XP+** | Bitmain | SHA-256 | BTC | 169.0 TH/s | 3296 W | ASIC Industrial |
-| 34 | **Antminer S19 Low Power (VNiSH)** | Bitmain | SHA-256 | BTC | 95.0 TH/s | 2800 W | Firmware Optimizado |
-| 35 | **Antminer S19k Pro 130T (VNiSH)** | Bitmain | SHA-256 | BTC | 130.0 TH/s | 3100 W | Firmware Optimizado |
-| 36 | **Antminer S19 100T (VNiSH OS)** | Bitmain | SHA-256 | BTC | 100.0 TH/s | 3150 W | Firmware Optimizado |
-| 37 | **MNTD. Blackspot Miner Limited** | RAKwireless | Proof-of-Coverage | HNT | 1 Hotspot | 5 W | Nodo IoT LoRaWAN |
+| 28 | **NerdQaxe++ Rev 6.1 (Quad-BM1370)** | OpenSource | SHA-256 | BTC | 6.0 TH/s | 105 W | Minero Silencioso |
+| 29 | **Lucky Miner LV08 Pro** | Lucky Miner | SHA-256 | BTC | 7.0 TH/s | 150 W | Lucky Miner (BM1368) |
+| 30 | **Lucky Miner LV08** | Lucky Miner | SHA-256 | BTC | 4.5 TH/s | 120 W | Lucky Miner (BM1366) |
+| 31 | **Bitaxe Gamma 602** | OpenSource | SHA-256 | BTC | 1.35 TH/s | 19 W | Micro Minero (BM1370) |
+| 32 | **Bitmain Antminer Z15 (Estándar)** | Bitmain | Equihash | ZEC | 420.0 KSol/s | 1510 W | ASIC Industrial |
+| 33 | **Bitmain Antminer X9** | Bitmain | RandomX | XMR | 1.0 MH/s | 2472 W | ASIC RandomX |
+| 34 | **Bitmain Antminer S19 XP+** | Bitmain | SHA-256 | BTC | 169.0 TH/s | 3296 W | ASIC Industrial |
+| 35 | **Antminer S19 Low Power (VNiSH)** | Bitmain | SHA-256 | BTC | 95.0 TH/s | 2800 W | Firmware Optimizado |
+| 36 | **Antminer S19k Pro 130T (VNiSH)** | Bitmain | SHA-256 | BTC | 130.0 TH/s | 3100 W | Firmware Optimizado |
+| 37 | **Antminer S19 100T (VNiSH OS)** | Bitmain | SHA-256 | BTC | 100.0 TH/s | 3150 W | Firmware Optimizado |
+| 38 | **MNTD. Blackspot Miner Limited** | RAKwireless | Proof-of-Coverage | HNT | 1 Hotspot | 5 W | Nodo IoT LoRaWAN |
 
 ---
 
@@ -234,7 +235,7 @@ Crypto_Mining_Simulator/
 │       └── release.yml                # Pipeline CD: SemVer y GitHub Releases
 ├── archives/                          # Directorio de snapshots y respaldos zip
 ├── data/
-│   └── hardware_db.py                 # Catálogo maestro de 37 mineros y especificaciones
+│   └── hardware_db.py                 # Catálogo maestro de 38 mineros y especificaciones
 ├── scripts/
 │   ├── auto_push/
 │   │   ├── auto_push.ps1 / .bat / .py # Automatización Git con IA (Gemini)

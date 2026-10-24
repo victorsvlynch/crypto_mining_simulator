@@ -312,7 +312,7 @@ with tab_ranking:
     with col_s1:
         search_query = st.text_input(
             "🔍 Buscar por modelo, fabricante, chip o moneda:",
-            placeholder="Ej: LV08, BM1368, Bitmain, Z15, Kaspa, Bitaxe, 4nm..."
+            placeholder="Ej: NerdQaxe, LV08, BM1370, Bitmain, Z15, Kaspa, Bitaxe, 4nm..."
         ).strip().lower()
 
     all_manufacturers = sorted(list({m.get("manufacturer", "Otro") for m in HARDWARE_CATALOG if m.get("manufacturer")}))
@@ -1713,6 +1713,7 @@ with tab_lucky:
                 * **Consumo:** 150W (LV08 Pro 7.0T: ~S/ 92/mes) / 85W (5.0T: ~S/ 52/mes) / 120W (LV08 4.5T: ~S/ 74/mes).
                 * **Precio:** ~$220 USD (LV08 Pro 7.0T) / ~$180 USD (LV08 4.5T).
                 * **Por qué lideran en probabilidad:** Con 7.0 TH/s y chips BM1368 de 4nm, procesa 14 veces más hashes que un LV06 y más de 5 veces que un Bitaxe Gamma. Si tu objetivo es **maximizar matemáticamente la probabilidad** de cazar el bloque de 3.125 BTC (o 3.125 BCH), el Lucky Miner LV08 Pro de 7.0 TH/s es el rey indiscutible de escritorio.
+                * **Alternativa de Alta Eficiencia (6.0 TH/s):** El nuevo **NerdQaxe++ Rev 6.1 (6.0 TH/s)** con 4 chips BM1370 de 3nm ofrece una impresionante eficiencia de 16.5 J/TH consumiendo solo 105W con refrigeración de doble ventilador silencioso y AxeOS de código abierto.
                 """
             )
 
@@ -1758,7 +1759,8 @@ with tab_lucky:
                 ⚠️ **¿Qué pasa con el NerdMiner v2? (Aclaración Crucial):**
                 * El NerdMiner cuesta muy barato ($20 - $25) y tiene pantalla con estadísticas, pero **NO tiene chips ASIC**. Mina utilizando la CPU de un microcontrolador ESP32-S3 a solo **78 KH/s** (0.000078 TH/s).
                 * Su probabilidad anual es de **1 en más de 170 millones**. En promedio tardaría 170 millones de años en encontrar un bloque.
-                * **Conclusión:** Cómpralo solo como un reloj decorativo o juguete educativo, **nunca** con la expectativa de ganar un bloque. Para tener probabilidades reales debes comprar un modelo con chips ASIC (Lucky Miner LV06/07/08 o Bitaxe Supra/Gamma).
+                * **Diferencia clave con NerdQaxe++ Rev 6.1:** ¡No confundir el NerdMiner (ESP32 de juguete) con el nuevo **NerdQaxe++ Rev 6.1**! El NerdQaxe++ sí es un minero ASIC real de alta gama equipado con 4 chips BM1370 de 3nm que entrega **6.0 TH/s** reales a 105W con doble ventilador.
+                * **Conclusión:** Si compras el NerdMiner v2, trátalo solo como un reloj decorativo. Para tener probabilidades reales de lotería debes elegir modelos ASIC (NerdQaxe++ Rev 6.1, Lucky Miner LV08/LV07 o Bitaxe Gamma).
                 """
             )
         with col_g2:
@@ -1780,7 +1782,7 @@ with tab_lucky:
         st.subheader("🌐 Lotería Solo Mining en Otras Criptomonedas (Altcoins)")
         st.markdown(
             """
-            Muchos usuarios desconocen que los mismos mineros **Bitaxe (Gamma 602, Supra)** y **Lucky Miner (LV08, LV07, LV06)** 
+            Muchos usuarios desconocen que los mismos mineros **NerdQaxe++**, **Bitaxe (Gamma 602, Supra)** y **Lucky Miner (LV08, LV07, LV06)** 
             pueden cambiarse en 30 segundos para minar **Bitcoin Cash (BCH)** u otras redes SHA-256. 
             
             Como esas redes tienen **mucha menor dificultad que Bitcoin**, ¡tus probabilidades de ganar un bloque se multiplican 
@@ -1958,8 +1960,8 @@ with tab_lucky:
         with vc_a1:
             st.markdown(
                 """
-                ### 🚀 1. Bitaxe / Lucky Miner en Bitcoin Cash (BCH):
-                * **La Gran Ventaja:** Usa exactamente el mismo aparato que compraste para Bitcoin (**Lucky Miner LV08 Pro 7.0T**, **LV08 estándar** o **Bitaxe Gamma 602**).
+                ### 🚀 1. Bitaxe / NerdQaxe++ / Lucky Miner en Bitcoin Cash (BCH):
+                * **La Gran Ventaja:** Usa exactamente el mismo aparato que compraste para Bitcoin (**NerdQaxe++ Rev 6.1 (6.0T)**, **Lucky Miner LV08 Pro 7.0T**, **LV08 estándar** o **Bitaxe Gamma 602**).
                 * **¿Por qué hacerlo?** La red de Bitcoin Cash tiene **140 veces menos competencia**.
                 * Con el nuevo **Lucky Miner LV08 Pro (7.0 TH/s)** tu probabilidad anual acumulada alcanza un extraordinario **~7.1%** (1 bloque cada ~14.1 años vs 1 en 1,900 años en BTC). Con el LV08 (4.5 TH/s) es del 4.6%.
                 * El premio por bloque es de **3.125 BCH** (~**$1,350 USD** / **S/ 5,060 Soles**).
