@@ -32,7 +32,8 @@ from services.calculator import (
     calculate_hybrid_solar_mining,
     calculate_noise_box_engineering,
     compare_mining_modes,
-    generate_html_executive_report
+    generate_html_executive_report,
+    calculate_hidrandina_peak_shaving
 )
 
 # ---------------------------------------------------------
@@ -50,15 +51,15 @@ st.set_page_config(
 # ---------------------------------------------------------
 @st.cache_data(ttl=300)
 def get_crypto_and_fx_data():
-    prices, prices_live = fetch_live_prices()
+    prices, prices_live, source = fetch_live_prices(return_source=True)
     fx, fx_live = fetch_usd_to_pen()
-    return prices, prices_live, fx, fx_live
+    return prices, prices_live, fx, fx_live, source
 
 @st.cache_data(ttl=60)
 def get_mempool_data():
     return fetch_mempool_bitcoin_stats()
 
-prices, prices_is_live, default_fx, fx_is_live = get_crypto_and_fx_data()
+prices, prices_is_live, default_fx, fx_is_live, oracle_source = get_crypto_and_fx_data()
 mempool_stats = get_mempool_data()
 
 # ---------------------------------------------------------
@@ -119,9 +120,33 @@ selected_pue_key = st.sidebar.selectbox(
 )
 selected_pue = FACTORES_CLIMA_CASA_GRANDE[selected_pue_key]["pue"]
 
-# 4. Parámetros de Minería
-st.sidebar.subheader("⛏️ Parámetros de Operación")
+# 4. Parámetros de Minería y OPEX
+st.sidebar.subheader("⛏️ Parámetros de Operación y OPEX")
 pool_fee = st.sidebar.slider("Comisión de Mining Pool (%):", min_value=0.0, max_value=4.0, value=1.5, step=0.1)
+
+maintenance_usd = st.sidebar.number_input(
+    "Mantenimiento y Filtros (OPEX no eléctrico USD/mes):",
+    min_value=0.0,
+    max_value=300.0,
+    value=0.0,
+    step=5.0,
+    help="Filtros lavables G4 por quema de cañaverales, pasta térmica y recambio de ventiladores en Casa Grande."
+)
+
+operating_hours_slider = st.sidebar.slider(
+    "Horas Operativas al Día:",
+    min_value=1.0,
+    max_value=24.0,
+    value=24.0,
+    step=0.5,
+    help="24h = continuo. 19h = apagado en horas punta de Hidrandina (18:00 a 23:00 de lunes a sábado)."
+)
+
+use_fp_btc = st.sidebar.checkbox(
+    "Cálculo Exacto por Hashrate de Red (BTC)",
+    value=True,
+    help="Calcula recompensas de Bitcoin directamente dividiendo tu hashrate entre el hashrate global de mempool.space."
+)
 
 currency_mode = st.sidebar.radio(
     "Moneda Principal de Visualización:",
@@ -162,7 +187,11 @@ ranked_miners = rank_all_miners(
     tariff_pen_kwh=tariff_pen,
     usd_to_pen=fx_rate,
     pue=selected_pue,
-    pool_fee_pct=pool_fee
+    pool_fee_pct=pool_fee,
+    maintenance_monthly_usd=maintenance_usd,
+    operating_hours_per_day=operating_hours_slider,
+    use_first_principles_btc=use_fp_btc,
+    network_hashrate_eh_btc=mempool_stats.get("hashrate_eh", 1000.0)
 )
 
 top_miner = ranked_miners[0]
@@ -188,8 +217,8 @@ with c_b2:
 with c_b3:
     st.metric("💱 Tipo de Cambio", f"S/ {fx_rate:.2f} PEN", "Por 1 USD")
 with c_b4:
-    estado_api = "🟢 En Vivo (CoinGecko)" if prices_is_live else "🟡 Referencia Offline"
-    st.metric("📡 Precios de Cripto", estado_api, f"BTC: ${prices.get('bitcoin', 0):,.0f}")
+    estado_api = f"🟢 En Vivo ({oracle_source})" if prices_is_live else "🟡 Referencia Offline"
+    st.metric("📡 Oráculo de Precios", estado_api, f"BTC: ${prices.get('bitcoin', 0):,.0f}")
 
 st.markdown("---")
 
@@ -585,14 +614,18 @@ with tab_simulator:
     else:
         target_hardware = next(h for h in HARDWARE_CATALOG if h["name"] == selected_miner_name)
 
-    # Cálculo específico
+    # Cálculo específico con parámetros avanzados
     sim_res = calculate_miner_profitability(
         hardware=target_hardware,
         live_prices=prices,
         tariff_pen_kwh=tariff_pen,
         usd_to_pen=fx_rate,
         pue=selected_pue,
-        pool_fee_pct=pool_fee
+        pool_fee_pct=pool_fee,
+        maintenance_monthly_usd=maintenance_usd,
+        operating_hours_per_day=operating_hours_slider,
+        use_first_principles_btc=use_fp_btc,
+        network_hashrate_eh_btc=mempool_stats.get("hashrate_eh", 1000.0)
     )
 
     # Tarjeta de Especificaciones
@@ -603,9 +636,19 @@ with tab_simulator:
         sc2.markdown(f"**Hashrate:** {sim_res['hashrate']} {sim_res['hashrate_unit']}")
         sc2.markdown(f"**Potencia Nominal:** {sim_res['power_watts']} Watts")
         sc3.markdown(f"**Potencia con PUE ({selected_pue}):** {sim_res['effective_power_watts']:.0f} W")
-        sc3.markdown(f"**Consumo Diario:** {sim_res['daily_kwh']} kWh/día")
+        sc3.markdown(f"**Consumo Diario ({sim_res['operating_hours_per_day']}h):** {sim_res['daily_kwh']} kWh/día")
         sc4.markdown(f"**Costo de Hardware:** ${sim_res['hardware_cost_usd']:,} USD")
         sc4.markdown(f"**Inversión en Soles:** S/ {sim_res['hardware_cost_pen']:,.2f}")
+
+    # Desglose de Merged Mining AuxPoW si aplica (Scrypt)
+    if sim_res.get("merged_breakdown"):
+        mb = sim_res["merged_breakdown"]
+        st.info(
+            f"🔀 **Minería Combinada (Merged Mining AuxPoW Scrypt):**  \n"
+            f"• **Litecoin (LTC):** `{mb['ltc_daily_coins']:.5f} LTC/día` (~${mb['ltc_daily_usd']:.2f} USD &bull; {mb['ltc_pct']}%)  \n"
+            f"• **Dogecoin (DOGE):** `{mb['doge_daily_coins']:,.1f} DOGE/día` (~${mb['doge_daily_usd']:.2f} USD &bull; {mb['doge_pct']}%)  \n"
+            f"_Minado simultáneo sin división de hashrate en pools Scrypt._"
+        )
 
     # Tabla Completa de Ganancias: Diario, Semanal, Mensual, Anual
     st.subheader("💰 Desglose Financiero: Ganancias Diarias, Semanales y Mensuales")
@@ -692,6 +735,14 @@ with tab_simulator:
             "⚠️ **Atención:** Con la tarifa seleccionada, el costo de electricidad supera a los ingresos. "
             "El equipo genera una pérdida operativa y no recuperará la inversión inicial a menos que se cambie a tarifa industrial o energía solar."
         )
+
+    st.download_button(
+        label=f"📥 Descargar Proyección de Flujo de Caja en CSV ({sim_res['name']})",
+        data=df_proj.to_csv(index=False).encode('utf-8-sig'),
+        file_name=f"flujo_caja_{sim_res.get('id', 'minero')}_24m.csv",
+        mime="text/csv",
+        use_container_width=True
+    )
 
     # =========================================================
     # SIMULADOR DE ENVEJECIMIENTO Y CRECIMIENTO DE DIFICULTAD
@@ -874,6 +925,71 @@ with tab_simulator:
             f"• **Varianza:** {m_solo['variance']}\n\n"
             f"*{m_solo['recommended_for']}*"
         )
+
+    # =========================================================
+    # SIMULADOR DE DISCRIMINACIÓN HORARIA HIDRANDINA (PEAK SHAVING)
+    # =========================================================
+    with st.expander("⚡ Simulación de Discriminación Horaria Hidrandina (Operación 19h Anti-Punta vs 24/7)", expanded=False):
+        st.markdown(
+            """
+            En las opciones tarifarias comerciales e industriales de Hidrandina (**BT3, BT4, MT2, MT3**), el consumo durante las 
+            **Horas Punta (18:00 a 23:00 de lunes a sábado)** tiene un recargo elevado por potencia coincidente en punta 
+            (promedio en Casa Grande: **S/ 48.50 por kW al mes**).
+            
+            Evalúa a continuación si conviene apagar o reducir carga durante esas 5 horas diarias para eliminar el cargo de potencia:
+            """
+        )
+        col_pk1, col_pk2 = st.columns(2)
+        with col_pk1:
+            peak_demand_charge = st.number_input(
+                "Cargo por Potencia en Horas Punta (S/ por kW-mes):",
+                min_value=10.0,
+                max_value=120.0,
+                value=48.50,
+                step=1.0,
+                help="Tarifa de Hidrandina para potencia en horas punta (BT3/BT4/MT)."
+            )
+        with col_pk2:
+            st.info(f"**Potencia del Minero:** {sim_res['effective_power_watts']/1000.0:.2f} kW | **Horas Apagado:** 5h/día (lun-sáb)")
+
+        peak_eval = calculate_hidrandina_peak_shaving(
+            hardware=target_hardware,
+            live_prices=prices,
+            tariff_pen_kwh=tariff_pen,
+            usd_to_pen=fx_rate,
+            pue=selected_pue,
+            pool_fee_pct=pool_fee,
+            peak_demand_charge_pen_per_kw=peak_demand_charge
+        )
+
+        col_pkr1, col_pkr2 = st.columns(2)
+        with col_pkr1:
+            st.markdown("#### 🔴 Modo Continuo (24/7)")
+            st.markdown(f"• **Ingresos Brutos Mes:** S/ {peak_eval['gross_24h_pen']:,.2f}")
+            st.markdown(f"• **Costo Energía Activa:** S/ {peak_eval['energy_cost_24h_pen']:,.2f}")
+            st.markdown(f"• **Recargo Potencia en Punta:** `S/ {peak_eval['peak_charge_24h_pen']:,.2f}`")
+            st.markdown(f"• **Costo Total Luz Mes:** S/ {peak_eval['total_power_cost_24h_pen']:,.2f}")
+            st.markdown(f"• **Ganancia Neta Mes:** **S/ {peak_eval['net_24h_pen']:,.2f}** (${peak_eval['net_24h_usd']:,.2f} USD)")
+
+        with col_pkr2:
+            st.markdown("#### 🟢 Modo Inteligente 19h (Anti-Punta)")
+            st.markdown(f"• **Ingresos Brutos Mes:** S/ {peak_eval['gross_19h_pen']:,.2f} *(~17.5% menos producción)*")
+            st.markdown(f"• **Costo Energía Activa:** S/ {peak_eval['energy_cost_19h_pen']:,.2f}")
+            st.markdown(f"• **Recargo Potencia en Punta:** `S/ 0.00` *(¡Ahorro total!)*")
+            st.markdown(f"• **Costo Total Luz Mes:** S/ {peak_eval['total_power_cost_19h_pen']:,.2f}")
+            st.markdown(f"• **Ganancia Neta Mes:** **S/ {peak_eval['net_19h_pen']:,.2f}** (${peak_eval['net_19h_usd']:,.2f} USD)")
+
+        if peak_eval["diff_net_pen"] > 0:
+            st.success(
+                f"💡 **Veredicto Hidrandina:** {peak_eval['recommendation']}  \n"
+                f"Ahorras **S/ {peak_eval['savings_power_pen']:,.2f}** en el recibo de luz frente a dejar de minar "
+                f"S/ {peak_eval['production_loss_pen']:,.2f} en criptomonedas, resultando en **S/ {peak_eval['diff_net_pen']:,.2f} más de ganancia limpia al mes** (${peak_eval['diff_net_usd']:.2f} USD)."
+            )
+        else:
+            st.warning(
+                f"💡 **Veredicto Hidrandina:** {peak_eval['recommendation']}  \n"
+                f"La alta rentabilidad de este minero genera más ingresos en esas 5 horas que el costo de la potencia en punta."
+            )
 
     st.markdown("---")
     st.subheader("📑 Descarga de Informes de Factibilidad")
@@ -1250,6 +1366,22 @@ with tab_energy:
         f"💡 **Retorno de Inversión Solar:** Ahorras **S/ {sol_res['monthly_saved_pen']:,.2f} al mes** (${sol_res['monthly_saved_usd']:.2f} USD/mes) en luz. "
         f"El sistema solar completo se amortiza en **{sol_res['payback_months']} meses** ({sol_res['payback_years']:.1f} años). "
         f"A partir de ese punto, ¡toda la energía para tu minero es 100% gratuita por los siguientes 25 años de vida útil de los paneles!"
+    )
+
+    df_solar_bom = pd.DataFrame([
+        {"Componente": f"Paneles Solares {sol_res['panel_wattage']}W Tier 1 (Jinko/Canadian/Longi)", "Cantidad": f"{sol_res['num_panels']} paneles", "Costo USD ($)": f"${sol_res['cost_panels_usd']:,.2f}", "Costo Soles (S/)": f"S/ {sol_res['cost_panels_usd']*fx_rate:,.2f}"},
+        {"Componente": f"Banco Baterías Litio LiFePO4 48V ({sol_res['battery_ah_48v']:.0f} Ah)", "Cantidad": f"{sol_res['battery_kwh_req']:.1f} kWh útiles", "Costo USD ($)": f"${sol_res['cost_battery_usd']:,.2f}", "Costo Soles (S/)": f"S/ {sol_res['cost_battery_usd']*fx_rate:,.2f}"},
+        {"Componente": f"Inversor Cargador Híbrido MPPT ({sol_res['inverter_model']})", "Cantidad": "1 unidad", "Costo USD ($)": f"${sol_res['cost_inverter_usd']:,.2f}", "Costo Soles (S/)": f"S/ {sol_res['cost_inverter_usd']*fx_rate:,.2f}"},
+        {"Componente": "BOS: Racks de Aluminio, Cable Solar 4mm², Puesta a Tierra y Protecciones", "Cantidad": "1 kit completo", "Costo USD ($)": f"${sol_res['cost_bos_usd']:,.2f}", "Costo Soles (S/)": f"S/ {sol_res['cost_bos_usd']*fx_rate:,.2f}"},
+        {"Componente": "TOTAL SISTEMA SOLAR AUTÓNOMO", "Cantidad": f"{sol_res['pv_kw_actual']:.2f} kWp", "Costo USD ($)": f"${sol_res['total_solar_cost_usd']:,.2f}", "Costo Soles (S/)": f"S/ {sol_res['total_solar_cost_pen']:,.2f}"}
+    ])
+    st.table(df_solar_bom)
+    st.download_button(
+        label="📥 Descargar Presupuesto y Lista de Materiales Solar (CSV)",
+        data=df_solar_bom.to_csv(index=False).encode('utf-8-sig'),
+        file_name=f"presupuesto_solar_{int(solar_target_w)}w_casa_grande.csv",
+        mime="text/csv",
+        use_container_width=True
     )
 
     st.markdown("---")

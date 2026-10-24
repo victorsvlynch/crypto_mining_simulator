@@ -41,12 +41,16 @@ Simulador técnico, financiero y probabilístico de minería de criptomonedas de
 Minar criptomonedas en el Perú presenta desafíos específicos: las tarifas eléctricas residenciales de Hidrandina en La Libertad rondan los **S/ 0.84 - S/ 0.85 por kWh** (~$0.22 - $0.23 USD/kWh), lo que vuelve no rentable a la mayoría de ASICs tradicionales refrigerados por aire a menos que se opere con esquemas comerciales, industriales o de autogeneración solar.
 
 Este simulador resuelve esa problemática proporcionando:
-1. **Modelado financiero preciso:** Cálculos en 4 horizontes temporales (24h, 7d, 30d, 365d) simultáneamente en **Dólares Americanos ($ USD)** y **Soles Peruanos (S/)**.
-2. **Contexto tarifario local de Casa Grande:** Incluyendo la tarifa de suministro real (`Recibo Real Parque Fábrica Mz.B Lt.01` a S/ 0.8528/kWh), tarifas comerciales BT3/BT4, industriales MT2/MT3 y energía solar Chicama.
-3. **Modelado de climatización (PUE):** Consumo adicional por disipación térmica y ventilación forzada en el clima cálido (22°C - 32°C) del Valle Chicama.
-4. **Resiliencia y envejecimiento:** Proyección a 36 meses con crecimiento de dificultad y Halving, cálculo de precio de apagado (Shutdown Price) y estrategia HODL vs Sell.
-5. **Ingeniería eléctrica y acústica:** Dimensionamiento según el Código Nacional de Electricidad (CNE/NEC) y diseño de cabina silenciadora (Noise Box).
-6. **Lotería Solo Mining:** Probabilidades estadísticas reales para micro mineros (Bitaxe, Lucky Miner, Avalon Nano) comparadas con loterías convencionales como La Tinka.
+1. **Modelado financiero preciso:** Cálculos en 4 horizontes temporales (24h, 7d, 30d, 365d) simultáneamente en **Dólares Americanos ($ USD)** y **Soles Peruanos (S/)**, con deducción opcional de **OPEX no eléctrico de mantenimiento** (filtros G4 lavables por quema de cañaverales, pasta térmica y recambio de ventiladores).
+2. **Contexto tarifario local de Casa Grande:** Incluyendo la tarifa de suministro real (Recibo Real Parque Fábrica Mz.B Lt.01 a S/ 0.8528/kWh), tarifas comerciales BT3/BT4, industriales MT2/MT3 y energía solar Chicama.
+3. **Discriminación horaria Hidrandina (Peak Shaving / Anti-Punta):** Comparador de operación 24/7 continua vs operación inteligente de 19 horas (apagando durante las 5 horas punta de 18:00 a 23:00 lun-sáb para eliminar el cargo de potencia coincidente en punta).
+4. **Desglose de Merged Mining AuxPoW:** Cálculo transparente de recompensas paralelas en mineros Scrypt (desglose exacto de LTC y DOGE diarios).
+5. **Modelado de climatización (PUE):** Consumo adicional por disipación térmica y ventilación forzada en el clima cálido (22°C - 32°C) del Valle Chicama.
+6. **Resiliencia y envejecimiento:** Proyección a 36 meses con crecimiento de dificultad y Halving, cálculo de precio de apagado (Shutdown Price) y estrategia HODL vs Sell.
+7. **Ingeniería eléctrica y acústica:** Dimensionamiento según el Código Nacional de Electricidad (CNE/NEC) y diseño de cabina silenciadora (Noise Box).
+8. **Lotería Solo Mining:** Probabilidades estadísticas reales para micro mineros (Bitaxe, Lucky Miner, Avalon Nano) comparadas con loterías convencionales como La Tinka.
+9. **Oráculo de Datos Multi-Fuente en Cascada:** Conexión redundante a CoinGecko, Binance Public API, Coinpaprika y Mempool.space en vivo (hashrate de red superando los 1,000 EH/s y dificultad en 140+ T).
+10. **Exportabilidad Completa:** Descarga en un clic de archivos CSV/Excel del ranking general, proyecciones de flujo de caja y lista de materiales (BOM) solar.
 
 ---
 

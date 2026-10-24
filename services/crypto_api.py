@@ -1,6 +1,10 @@
 """
 Servicio para consultar precios de criptomonedas y tasas de cambio en tiempo real.
-Con almacenamiento en caché y contingencia (fallbacks) offline.
+Con almacenamiento en caché y contingencia multi-fuente en cascada:
+1. CoinGecko API (fuente primaria global)
+2. Binance Public Ticker API (fuente secundaria de alta velocidad)
+3. Coinpaprika API (fuente terciaria para altcoins como KAS, ALPH)
+4. Contingencia (fallbacks) offline calibrada
 """
 
 import json
@@ -25,50 +29,147 @@ DEFAULT_PRICES = {
 DEFAULT_USD_PEN = 3.75
 
 
-def fetch_live_prices() -> Tuple[Dict[str, float], bool]:
-    """
-    Obtiene los precios actuales en USD de CoinGecko.
-    Retorna un diccionario de {id: precio_usd} y un booleano indicando si fue en vivo o fallback.
-    """
+def _fetch_from_coingecko() -> Dict[str, float]:
     ids = "bitcoin,litecoin,dogecoin,kaspa,alephium,ravencoin,ethereum-classic,zcash,minotari,monero,helium,bitcoin-cash"
     url = f"https://api.coingecko.com/api/v3/simple/price?ids={ids}&vs_currencies=usd"
-    
+    req = urllib.request.Request(
+        url,
+        headers={"User-Agent": "CryptoSimulatorPeru/2.0 (Streamlit App)"}
+    )
+    with urllib.request.urlopen(req, timeout=3.5) as response:
+        data = json.loads(response.read().decode())
+        result = {}
+        for coin_id in DEFAULT_PRICES:
+            if coin_id in data and "usd" in data[coin_id]:
+                result[coin_id] = float(data[coin_id]["usd"])
+        if len(result) >= 5:
+            return result
+    raise ValueError("CoinGecko data incomplete")
+
+
+def _fetch_from_binance() -> Dict[str, float]:
+    binance_map = {
+        "BTCUSDT": "bitcoin",
+        "LTCUSDT": "litecoin",
+        "DOGEUSDT": "dogecoin",
+        "ETCUSDT": "ethereum-classic",
+        "RVNUSDT": "ravencoin",
+        "ZECUSDT": "zcash",
+        "BCHUSDT": "bitcoin-cash",
+        "HNTUSDT": "helium"
+    }
+    url = "https://api.binance.com/api/v3/ticker/price"
+    req = urllib.request.Request(
+        url,
+        headers={"User-Agent": "CryptoSimulatorPeru/2.0"}
+    )
+    with urllib.request.urlopen(req, timeout=3.0) as response:
+        data = json.loads(response.read().decode())
+        result = {}
+        for item in data:
+            sym = item.get("symbol", "")
+            if sym in binance_map:
+                result[binance_map[sym]] = float(item.get("price", 0))
+        if len(result) >= 4:
+            return result
+    raise ValueError("Binance data incomplete")
+
+
+def _fetch_from_coinpaprika() -> Dict[str, float]:
+    paprika_coins = {
+        "kas-kaspa": "kaspa",
+        "alph-alephium": "alephium"
+    }
+    result = {}
+    for pid, cid in paprika_coins.items():
+        try:
+            url = f"https://api.coinpaprika.com/v1/tickers/{pid}"
+            req = urllib.request.Request(url, headers={"User-Agent": "CryptoSimulatorPeru/2.0"})
+            with urllib.request.urlopen(req, timeout=2.5) as r:
+                data = json.loads(r.read().decode())
+                p = float(data.get("quotes", {}).get("USD", {}).get("price", 0))
+                if p > 0:
+                    result[cid] = p
+        except Exception:
+            pass
+    return result
+
+
+def fetch_live_prices(return_source: bool = False) -> Any:
+    """
+    Obtiene los precios actuales en USD mediante contingencia multi-fuente en cascada:
+    1. CoinGecko API
+    2. Binance API + Coinpaprika API
+    3. Fallback Offline predeterminado
+    """
+    prices = {k: v["usd"] for k, v in DEFAULT_PRICES.items()}
+    source = "Fallback Offline"
+    is_live = False
+
+    # 1. Intentar CoinGecko
     try:
-        req = urllib.request.Request(
-            url,
-            headers={"User-Agent": "CryptoSimulatorPeru/1.0 (Streamlit App)"}
-        )
-        with urllib.request.urlopen(req, timeout=4) as response:
-            data = json.loads(response.read().decode())
-            prices = {}
-            for coin_id, defaults in DEFAULT_PRICES.items():
-                if coin_id in data and "usd" in data[coin_id]:
-                    prices[coin_id] = float(data[coin_id]["usd"])
-                else:
-                    prices[coin_id] = defaults["usd"]
-            return prices, True
+        cg_prices = _fetch_from_coingecko()
+        for k, v in cg_prices.items():
+            prices[k] = v
+        is_live = True
+        source = "CoinGecko API"
     except Exception:
-        # Fallback si hay corte de red o rate-limit
-        prices = {k: v["usd"] for k, v in DEFAULT_PRICES.items()}
-        return prices, False
+        # 2. Fallback a Binance + Coinpaprika
+        try:
+            bn_prices = _fetch_from_binance()
+            for k, v in bn_prices.items():
+                prices[k] = v
+            # Complementar altcoins que no están en Binance con Coinpaprika
+            pap_prices = _fetch_from_coinpaprika()
+            for k, v in pap_prices.items():
+                prices[k] = v
+            is_live = True
+            source = "Binance + Coinpaprika (Alta Velocidad)"
+        except Exception:
+            # 3. Mantener precios default offline
+            is_live = False
+            source = "Valores de Referencia Offline"
+
+    if return_source:
+        return prices, is_live, source
+    return prices, is_live
 
 
 def fetch_usd_to_pen() -> Tuple[float, bool]:
     """
-    Obtiene el tipo de cambio oficial USD a PEN (Sol Peruano).
+    Obtiene el tipo de cambio oficial USD a PEN (Sol Peruano) con fallback secundario.
     """
-    url = "https://open.er-api.com/v6/latest/USD"
+    # 1. Open Exchange Rates API pública
+    url_primary = "https://open.er-api.com/v6/latest/USD"
     try:
         req = urllib.request.Request(
-            url,
-            headers={"User-Agent": "CryptoSimulatorPeru/1.0"}
+            url_primary,
+            headers={"User-Agent": "CryptoSimulatorPeru/2.0"}
         )
-        with urllib.request.urlopen(req, timeout=4) as response:
+        with urllib.request.urlopen(req, timeout=3.5) as response:
             data = json.loads(response.read().decode())
-            rate = float(data.get("rates", {}).get("PEN", DEFAULT_USD_PEN))
-            return round(rate, 3), True
+            rate = float(data.get("rates", {}).get("PEN", 0))
+            if rate > 2.5:
+                return round(rate, 3), True
     except Exception:
-        return DEFAULT_USD_PEN, False
+        pass
+
+    # 2. ExchangeRate-API pública secundaria
+    url_secondary = "https://api.exchangerate-api.com/v4/latest/USD"
+    try:
+        req = urllib.request.Request(
+            url_secondary,
+            headers={"User-Agent": "CryptoSimulatorPeru/2.0"}
+        )
+        with urllib.request.urlopen(req, timeout=3.0) as response:
+            data = json.loads(response.read().decode())
+            rate = float(data.get("rates", {}).get("PEN", 0))
+            if rate > 2.5:
+                return round(rate, 3), True
+    except Exception:
+        pass
+
+    return DEFAULT_USD_PEN, False
 
 
 def fetch_mempool_bitcoin_stats() -> Dict[str, Any]:
@@ -96,9 +197,9 @@ def fetch_mempool_bitcoin_stats() -> Dict[str, Any]:
         # 1. Dificultad y progreso del período de 2016 bloques
         req_diff = urllib.request.Request(
             "https://mempool.space/api/v1/difficulty-adjustment",
-            headers={"User-Agent": "CryptoSimulatorPeru/1.0"}
+            headers={"User-Agent": "CryptoSimulatorPeru/2.0"}
         )
-        with urllib.request.urlopen(req_diff, timeout=4) as r:
+        with urllib.request.urlopen(req_diff, timeout=3.5) as r:
             diff_data = json.loads(r.read().decode())
             diff_change = float(diff_data.get("difficultyChange", 1.5))
             rem_blocks = int(diff_data.get("remainingBlocks", 1008))
@@ -107,9 +208,9 @@ def fetch_mempool_bitcoin_stats() -> Dict[str, Any]:
         # 2. Hashrate global y dificultad actual
         req_hash = urllib.request.Request(
             "https://mempool.space/api/v1/mining/hashrate/3d",
-            headers={"User-Agent": "CryptoSimulatorPeru/1.0"}
+            headers={"User-Agent": "CryptoSimulatorPeru/2.0"}
         )
-        with urllib.request.urlopen(req_hash, timeout=4) as r:
+        with urllib.request.urlopen(req_hash, timeout=3.5) as r:
             h_data = json.loads(r.read().decode())
             curr_h_raw = float(h_data.get("currentHashrate", 7.2e20))
             curr_h_eh = round(curr_h_raw / 1e18, 2)
@@ -119,9 +220,9 @@ def fetch_mempool_bitcoin_stats() -> Dict[str, Any]:
         # 3. Altura de bloque
         req_tip = urllib.request.Request(
             "https://mempool.space/api/blocks/tip/height",
-            headers={"User-Agent": "CryptoSimulatorPeru/1.0"}
+            headers={"User-Agent": "CryptoSimulatorPeru/2.0"}
         )
-        with urllib.request.urlopen(req_tip, timeout=4) as r:
+        with urllib.request.urlopen(req_tip, timeout=3.5) as r:
             tip_height = int(r.read().decode().strip())
 
         # 4. Comisiones recomendadas
@@ -129,9 +230,9 @@ def fetch_mempool_bitcoin_stats() -> Dict[str, Any]:
         try:
             req_fee = urllib.request.Request(
                 "https://mempool.space/api/v1/fees/recommended",
-                headers={"User-Agent": "CryptoSimulatorPeru/1.0"}
+                headers={"User-Agent": "CryptoSimulatorPeru/2.0"}
             )
-            with urllib.request.urlopen(req_fee, timeout=3) as r:
+            with urllib.request.urlopen(req_fee, timeout=3.0) as r:
                 fee_data = json.loads(r.read().decode())
                 fastest_fee = int(fee_data.get("fastestFee", 10))
         except Exception:
@@ -178,7 +279,7 @@ def fetch_local_miner_status(ip_address: str, timeout: float = 2.5) -> Dict[str,
     
     url = f"http://{clean_ip}/api/system/info"
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "CryptoSimulator/1.0"})
+        req = urllib.request.Request(url, headers={"User-Agent": "CryptoSimulator/2.0"})
         with urllib.request.urlopen(req, timeout=timeout) as response:
             data = json.loads(response.read().decode())
             return {

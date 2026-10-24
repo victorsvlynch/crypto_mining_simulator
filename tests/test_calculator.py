@@ -263,6 +263,62 @@ def test_profitability_calculations():
     assert res_bt5b["name"] in html_rep
     print("Test 8 (Suite Pro Avanzada): PASSED")
 
+    # Test 9: Nuevas Mejoras Profesionales (Peak Shaving, Merged Mining, OPEX, First-Principles, Multi-Oracle)
+    from services.calculator import calculate_hidrandina_peak_shaving
+    from services.crypto_api import fetch_live_prices
+
+    # 9.1 Multi-Oráculo con origen
+    p_multi, is_l, src_name = fetch_live_prices(return_source=True)
+    assert is_l is True or is_l is False
+    assert len(src_name) > 0
+
+    # 9.2 OPEX de mantenimiento no eléctrico
+    res_with_maint = calculate_miner_profitability(
+        hardware=test_hw,
+        live_prices=mock_prices,
+        tariff_pen_kwh=0.84,
+        usd_to_pen=3.75,
+        pue=1.05,
+        pool_fee_pct=1.5,
+        maintenance_monthly_usd=25.0
+    )
+    assert res_with_maint["maintenance_monthly_usd"] == 25.0
+    assert res_with_maint["monthly_net_usd"] == round(res_bt5b["monthly_net_usd"] - 25.0, 2)
+
+    # 9.3 Merged Mining en Scrypt (LTC + DOGE)
+    assert res_bt5b["merged_breakdown"] is not None
+    assert res_bt5b["merged_breakdown"]["is_merged"] is True
+    assert res_bt5b["merged_breakdown"]["ltc_daily_coins"] > 0
+    assert res_bt5b["merged_breakdown"]["doge_daily_coins"] > 0
+
+    # 9.4 First-principles para Bitcoin
+    btc_hw = next(m for m in HARDWARE_CATALOG if m["id"] == "antminer_s21_pro")
+    res_btc_first = calculate_miner_profitability(
+        hardware=btc_hw,
+        live_prices=mock_prices,
+        tariff_pen_kwh=0.84,
+        usd_to_pen=3.75,
+        pue=1.05,
+        use_first_principles_btc=True,
+        network_hashrate_eh_btc=1000.0
+    )
+    assert res_btc_first["daily_gross_usd"] > 0
+
+    # 9.5 Peak Shaving Hidrandina (19h vs 24h)
+    peak_res = calculate_hidrandina_peak_shaving(
+        hardware=test_hw,
+        live_prices=mock_prices,
+        tariff_pen_kwh=0.55,
+        usd_to_pen=3.75,
+        pue=1.05,
+        peak_demand_charge_pen_per_kw=48.50
+    )
+    assert "net_24h_pen" in peak_res
+    assert "net_19h_pen" in peak_res
+    assert "recommended_mode" in peak_res
+    assert peak_res["savings_power_pen"] > 0
+    print("Test 9 (Nuevas Mejoras Profesionales): PASSED")
+
 if __name__ == "__main__":
     test_profitability_calculations()
     print("Todas las pruebas pasaron satisfactoriamente.")

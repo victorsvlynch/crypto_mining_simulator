@@ -14,27 +14,58 @@ def calculate_miner_profitability(
     usd_to_pen: float,
     pue: float = 1.05,
     pool_fee_pct: float = 1.5,
-    custom_revenue_mult: float = 1.0
+    custom_revenue_mult: float = 1.0,
+    maintenance_monthly_usd: float = 0.0,
+    operating_hours_per_day: float = 24.0,
+    use_first_principles_btc: bool = False,
+    network_hashrate_eh_btc: float = 1000.0
 ) -> Dict[str, Any]:
     """
     Realiza el análisis integral de ingresos y egresos para un equipo de minería.
+    Soporta:
+    - Estimación por primeros principios (First-Principles) para BTC
+    - Desglose de minería combinada (Merged Mining AuxPoW) para Scrypt (LTC + DOGE)
+    - Costos operativos no eléctricos (OPEX de mantenimiento, filtros por cañaverales)
+    - Discriminación horaria (operación parcial ej. 19h anti-punta vs 24h continua)
     """
-    # 1. Determinar precio del activo y factor de escala
     coin_id = hardware.get("coin_id", "bitcoin")
+    operating_hours = max(1.0, min(float(operating_hours_per_day), 24.0))
+    hours_factor = operating_hours / 24.0
     
-    # Calcular ingreso base diario escalado según precio actual vs benchmark
+    # 1. Determinar precio del activo y factor de escala
     base_rev = hardware.get("daily_revenue_base_usd", 10.0)
     
-    # Ajuste dinámico según fluctuación de precios de mercado
     price_scale = 1.0
+    current_p = 81000.0
+    merged_breakdown = None
+
     if coin_id == "bitcoin":
         current_p = live_prices.get("bitcoin", 81000.0)
         price_scale = current_p / 65000.0
     elif coin_id == "dogecoin_litecoin":
         ltc_p = live_prices.get("litecoin", 65.0)
         doge_p = live_prices.get("dogecoin", 0.085)
-        # 80% del valor de Scrypt suele provenir de Doge, 20% de LTC
         price_scale = (0.75 * (doge_p / 0.12)) + (0.25 * (ltc_p / 70.0))
+        
+        # Desglose de Merged Mining AuxPoW (Scrypt global ~1.4 PH/s)
+        scrypt_hs = float(hardware.get("hashrate_hs", 0.0))
+        if scrypt_hs <= 0 and "hashrate" in hardware:
+            scrypt_hs = float(hardware.get("hashrate", 0.0)) * 1e9
+        net_scrypt_hs = 1.4e15
+        ltc_daily_coins = (scrypt_hs / net_scrypt_hs) * 576.0 * 6.25 * hours_factor
+        doge_daily_coins = (scrypt_hs / net_scrypt_hs) * 1440.0 * 10000.0 * hours_factor
+        ltc_daily_usd = ltc_daily_coins * ltc_p
+        doge_daily_usd = doge_daily_coins * doge_p
+        tot_scrypt_usd = ltc_daily_usd + doge_daily_usd
+        merged_breakdown = {
+            "is_merged": True,
+            "ltc_daily_coins": round(ltc_daily_coins, 5),
+            "ltc_daily_usd": round(ltc_daily_usd, 2),
+            "doge_daily_coins": round(doge_daily_coins, 2),
+            "doge_daily_usd": round(doge_daily_usd, 2),
+            "ltc_pct": round((ltc_daily_usd / tot_scrypt_usd * 100.0) if tot_scrypt_usd > 0 else 25.0, 1),
+            "doge_pct": round((doge_daily_usd / tot_scrypt_usd * 100.0) if tot_scrypt_usd > 0 else 75.0, 1)
+        }
     elif coin_id == "kaspa":
         current_p = live_prices.get("kaspa", 0.045)
         price_scale = current_p / 0.12
@@ -60,19 +91,29 @@ def calculate_miner_profitability(
         current_p = live_prices.get("helium", 0.41)
         price_scale = current_p / 0.41
 
-    # Ingreso bruto diario en USD
-    daily_gross_usd = base_rev * price_scale * custom_revenue_mult
+    # Cálculo del ingreso bruto diario
+    if coin_id == "bitcoin" and use_first_principles_btc:
+        # Primeros principios: hashrate / red * 144 bloques * (3.125 + comisiones)
+        hw_th = float(hardware.get("hashrate_hs", 0.0)) / 1e12
+        if hw_th <= 0 and "hashrate" in hardware:
+            u = hardware.get("hashrate_unit", "TH/s")
+            val = float(hardware.get("hashrate", 0.0))
+            hw_th = val if u == "TH/s" else (val / 1000.0 if u == "GH/s" else val * 1e6)
+        net_th = max(float(network_hashrate_eh_btc) * 1e6, 1.0)
+        daily_btc = (hw_th / net_th) * 144.0 * 3.25 * hours_factor
+        daily_gross_usd = daily_btc * current_p * custom_revenue_mult
+    else:
+        daily_gross_usd = base_rev * price_scale * custom_revenue_mult * hours_factor
     
     # Descuento de comisión de pool (ej. 1.5%)
     pool_fee_factor = 1.0 - (pool_fee_pct / 100.0)
     daily_gross_usd_after_pool = daily_gross_usd * pool_fee_factor
 
-    # Consumo diario (kWh) considerando potencia y factor PUE de Casa Grande
+    # Consumo diario (kWh) considerando potencia, PUE de Casa Grande y horas de operación
     power_watts = hardware.get("power_watts", 3000)
     effective_power_watts = power_watts * pue
     
-    # Horas al día = 24
-    daily_kwh = round((effective_power_watts * 24.0) / 1000.0, 2)
+    daily_kwh = round((effective_power_watts * operating_hours) / 1000.0, 2)
     weekly_kwh = round(daily_kwh * 7.0, 2)
     monthly_kwh = round(daily_kwh * 30.0, 2)
     yearly_kwh = round(daily_kwh * 365.0, 2)
@@ -101,17 +142,24 @@ def calculate_miner_profitability(
     yearly_gross_usd = daily_gross_usd_after_pool * 365.0
     yearly_gross_pen = yearly_gross_usd * usd_to_pen
 
-    # 5. Ganancia Neta (Utilidad = Ingresos - Costo Eléctrico)
-    daily_net_usd = daily_gross_usd_after_pool - daily_power_cost_usd
+    # 5. OPEX no eléctrico (Mantenimiento, filtros y repuestos)
+    daily_maint_usd = maintenance_monthly_usd / 30.0
+    daily_maint_pen = daily_maint_usd * usd_to_pen
+    monthly_maint_pen = maintenance_monthly_usd * usd_to_pen
+    yearly_maint_usd = maintenance_monthly_usd * 12.0
+    yearly_maint_pen = yearly_maint_usd * usd_to_pen
+
+    # 6. Ganancia Neta (Utilidad = Ingresos - Costo Eléctrico - Mantenimiento)
+    daily_net_usd = daily_gross_usd_after_pool - daily_power_cost_usd - daily_maint_usd
     daily_net_pen = daily_net_usd * usd_to_pen
 
-    weekly_net_usd = weekly_gross_usd - weekly_power_cost_usd
+    weekly_net_usd = weekly_gross_usd - weekly_power_cost_usd - (daily_maint_usd * 7.0)
     weekly_net_pen = weekly_net_usd * usd_to_pen
 
-    monthly_net_usd = monthly_gross_usd - monthly_power_cost_usd
+    monthly_net_usd = monthly_gross_usd - monthly_power_cost_usd - maintenance_monthly_usd
     monthly_net_pen = monthly_net_usd * usd_to_pen
 
-    yearly_net_usd = yearly_gross_usd - yearly_power_cost_usd
+    yearly_net_usd = yearly_gross_usd - yearly_power_cost_usd - yearly_maint_usd
     yearly_net_pen = yearly_net_usd * usd_to_pen
 
     # Margen de beneficio neto
@@ -120,7 +168,7 @@ def calculate_miner_profitability(
     else:
         net_margin_pct = -100.0
 
-    # 6. Retorno de Inversión (ROI)
+    # 7. Retorno de Inversión (ROI)
     hardware_cost_usd = hardware.get("hardware_cost_usd", 3000)
     hardware_cost_pen = hardware_cost_usd * usd_to_pen
 
@@ -133,10 +181,9 @@ def calculate_miner_profitability(
         roi_months = None
         roi_status = "No Rentable (Pérdida Operativa)"
 
-    # 7. Punto de Equilibrio de Tarifa Eléctrica (Break-even electricity price)
-    # ¿Hasta qué precio de kWh en S/ sigue siendo rentable?
+    # 8. Punto de Equilibrio de Tarifa Eléctrica (Break-even electricity price)
     if daily_kwh > 0:
-        breakeven_tariff_usd_kwh = daily_gross_usd_after_pool / daily_kwh
+        breakeven_tariff_usd_kwh = (daily_gross_usd_after_pool - daily_maint_usd) / daily_kwh
         breakeven_tariff_pen_kwh = breakeven_tariff_usd_kwh * usd_to_pen
     else:
         breakeven_tariff_usd_kwh = 0.0
@@ -202,6 +249,12 @@ def calculate_miner_profitability(
         "yearly_power_cost_pen": round(yearly_power_cost_pen, 2),
         "yearly_net_usd": round(yearly_net_usd, 2),
         "yearly_net_pen": round(yearly_net_pen, 2),
+
+        # Mantenimiento / OPEX y Parámetros Operativos
+        "maintenance_monthly_usd": round(maintenance_monthly_usd, 2),
+        "maintenance_monthly_pen": round(monthly_maint_pen, 2),
+        "operating_hours_per_day": round(operating_hours, 1),
+        "merged_breakdown": merged_breakdown
     }
 
 
@@ -211,7 +264,11 @@ def rank_all_miners(
     tariff_pen_kwh: float,
     usd_to_pen: float,
     pue: float = 1.05,
-    pool_fee_pct: float = 1.5
+    pool_fee_pct: float = 1.5,
+    maintenance_monthly_usd: float = 0.0,
+    operating_hours_per_day: float = 24.0,
+    use_first_principles_btc: bool = False,
+    network_hashrate_eh_btc: float = 1000.0
 ) -> List[Dict[str, Any]]:
     """
     Evalúa todos los mineros del catálogo y los ordena de mayor a menor ganancia neta diaria/mensual.
@@ -224,7 +281,11 @@ def rank_all_miners(
             tariff_pen_kwh=tariff_pen_kwh,
             usd_to_pen=usd_to_pen,
             pue=pue,
-            pool_fee_pct=pool_fee_pct
+            pool_fee_pct=pool_fee_pct,
+            maintenance_monthly_usd=maintenance_monthly_usd,
+            operating_hours_per_day=operating_hours_per_day,
+            use_first_principles_btc=use_first_principles_btc,
+            network_hashrate_eh_btc=network_hashrate_eh_btc
         )
         results.append(res)
     
@@ -1265,6 +1326,105 @@ def generate_html_executive_report(
 </body>
 </html>"""
     return html
+
+
+def calculate_hidrandina_peak_shaving(
+    hardware: Dict[str, Any],
+    live_prices: Dict[str, float],
+    tariff_pen_kwh: float,
+    usd_to_pen: float,
+    pue: float = 1.05,
+    pool_fee_pct: float = 1.5,
+    peak_demand_charge_pen_per_kw: float = 48.50,
+    curtailment_hours_per_day: float = 5.0
+) -> Dict[str, Any]:
+    """
+    Simula y compara la estrategia de discriminación horaria (Peak Shaving) en Casa Grande (Hidrandina):
+    - Modo 24/7 Continuo: Opera las 24 horas pagando energía activa y el recargo por potencia coincidente en horas punta (18:00 a 23:00 lun-sáb).
+    - Modo 19 Horas (Anti-Punta): Apaga o reduce carga durante las 5 horas punta, eliminando el cargo por potencia en horas punta.
+    """
+    # 1. Modo 24h
+    res_24 = calculate_miner_profitability(
+        hardware=hardware,
+        live_prices=live_prices,
+        tariff_pen_kwh=tariff_pen_kwh,
+        usd_to_pen=usd_to_pen,
+        pue=pue,
+        pool_fee_pct=pool_fee_pct,
+        operating_hours_per_day=24.0
+    )
+    effective_kw = (hardware.get("power_watts", 3000) * pue) / 1000.0
+    # Cargo mensual por potencia en punta (S/)
+    peak_charge_24h_pen = effective_kw * peak_demand_charge_pen_per_kw
+    peak_charge_24h_usd = peak_charge_24h_pen / usd_to_pen
+
+    total_power_cost_24h_pen = res_24["monthly_power_cost_pen"] + peak_charge_24h_pen
+    total_power_cost_24h_usd = total_power_cost_24h_pen / usd_to_pen
+    net_24h_pen = res_24["monthly_gross_pen"] - total_power_cost_24h_pen
+    net_24h_usd = net_24h_pen / usd_to_pen
+
+    # 2. Modo 19h (apaga en punta: 19 horas efectivas lun-sáb, domingos 24h -> promedio ponderado ~19.7 horas)
+    avg_hours_curtailed = (19.0 * 6.0 + 24.0 * 1.0) / 7.0
+    res_19 = calculate_miner_profitability(
+        hardware=hardware,
+        live_prices=live_prices,
+        tariff_pen_kwh=tariff_pen_kwh,
+        usd_to_pen=usd_to_pen,
+        pue=pue,
+        pool_fee_pct=pool_fee_pct,
+        operating_hours_per_day=avg_hours_curtailed
+    )
+    # En modo 19h no se consume en horas punta, cargo de potencia coincidente en punta = S/ 0
+    peak_charge_19h_pen = 0.0
+    total_power_cost_19h_pen = res_19["monthly_power_cost_pen"]
+    total_power_cost_19h_usd = res_19["monthly_power_cost_usd"]
+    net_19h_pen = res_19["monthly_gross_pen"] - total_power_cost_19h_pen
+    net_19h_usd = net_19h_pen / usd_to_pen
+
+    diff_net_pen = net_19h_pen - net_24h_pen
+    diff_net_usd = diff_net_pen / usd_to_pen
+
+    savings_power_pen = total_power_cost_24h_pen - total_power_cost_19h_pen
+    production_loss_pen = res_24["monthly_gross_pen"] - res_19["monthly_gross_pen"]
+
+    if diff_net_pen > 0:
+        recommendation = "🟢 Estrategia Recomendada: Operar 19 Horas (Anti-Punta). El ahorro en cargo por potencia y energía supera las monedas dejadas de minar."
+        recommended_mode = "19h_curtailment"
+    else:
+        recommendation = "🟡 Estrategia Recomendada: Operar 24/7 Continuo. El margen minero es lo suficientemente alto para justificar el pago de potencia en punta."
+        recommended_mode = "24h_continuous"
+
+    return {
+        "hardware_name": hardware.get("name"),
+        "effective_kw": round(effective_kw, 2),
+        "peak_demand_charge_pen_per_kw": peak_demand_charge_pen_per_kw,
+        "avg_operating_hours_curtailed": round(avg_hours_curtailed, 1),
+        
+        # 24h
+        "gross_24h_pen": round(res_24["monthly_gross_pen"], 2),
+        "energy_cost_24h_pen": round(res_24["monthly_power_cost_pen"], 2),
+        "peak_charge_24h_pen": round(peak_charge_24h_pen, 2),
+        "total_power_cost_24h_pen": round(total_power_cost_24h_pen, 2),
+        "net_24h_pen": round(net_24h_pen, 2),
+        "net_24h_usd": round(net_24h_usd, 2),
+
+        # 19h
+        "gross_19h_pen": round(res_19["monthly_gross_pen"], 2),
+        "energy_cost_19h_pen": round(res_19["monthly_power_cost_pen"], 2),
+        "peak_charge_19h_pen": 0.0,
+        "total_power_cost_19h_pen": round(total_power_cost_19h_pen, 2),
+        "net_19h_pen": round(net_19h_pen, 2),
+        "net_19h_usd": round(net_19h_usd, 2),
+
+        # Comparativa
+        "savings_power_pen": round(savings_power_pen, 2),
+        "production_loss_pen": round(production_loss_pen, 2),
+        "diff_net_pen": round(diff_net_pen, 2),
+        "diff_net_usd": round(diff_net_usd, 2),
+        "recommended_mode": recommended_mode,
+        "recommendation": recommendation
+    }
+
 
 
 
