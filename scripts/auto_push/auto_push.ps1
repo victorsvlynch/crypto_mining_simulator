@@ -137,7 +137,7 @@ try {
 
     $hasRemote = $false
     try {
-        $remotes = (git remote 2>$null)
+        $remotes = (git remote)
         if ($remotes) { $hasRemote = $true }
     } catch {}
 
@@ -159,13 +159,28 @@ try {
     Write-Host "Subiendo cambios (git push) al repositorio remoto..." -ForegroundColor Yellow
     $branch = "main"
     try {
-        $cur = (git branch --show-current 2>$null)
+        $cur = (git branch --show-current)
         if ($cur) { $branch = $cur.Trim() }
     } catch {}
 
-    git push -u origin $branch 2>$null
-    if ($LASTEXITCODE -ne 0) {
+    # Git escribe la información de progreso estándar (como 'To https://...') en stderr.
+    # En PowerShell con $ErrorActionPreference = 'Stop', redirigir o capturar stderr
+    # provoca una falsa excepción fatal. Se relaja temporalmente a Continue y se valida $LASTEXITCODE.
+    $prevEAP = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+
+    git push -u origin $branch
+    $pushCode = $LASTEXITCODE
+
+    if ($pushCode -ne 0) {
         git push
+        $pushCode = $LASTEXITCODE
+    }
+
+    $ErrorActionPreference = $prevEAP
+
+    if ($pushCode -ne 0) {
+        throw "git push no pudo subir los cambios al repositorio remoto (código de salida: $pushCode)."
     }
 
     Write-Host ""
