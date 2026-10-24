@@ -19,17 +19,18 @@ Simulador técnico, financiero, probabilístico y de ingeniería eléctrica para
   - [1. 🏆 Ranking de Rentabilidad en Casa Grande](#1--ranking-de-rentabilidad-en-casa-grande)
   - [2. 🔍 Simulador Detallado de un Minero](#2--simulador-detallado-de-un-minero)
   - [3. 💎 Análisis Profesional: Antminer Z15 Pro](#3--análisis-profesional-antminer-z15-pro)
-  - [4. ☀️ Análisis Eléctrico y Clima (Valle Chicama)](#4--análisis-eléctrico-y-clima-valle-chicama)
-  - [5. 🎰 Mineros Lucky y Lotería Solo Mining (BTC y Altcoins)](#5--mineros-lucky-y-lotería-solo-mining-btc-y-altcoins)
-    - [5.1. 🟠 Lotería Solo Bitcoin (BTC)](#51--lotería-solo-bitcoin-btc)
-    - [5.2. 🌐 Lotería Solo en Altcoins (BCH, Kaspa, Doge, Tari)](#52--lotería-solo-en-altcoins-bch-kaspa-doge-tari)
-    - [5.3. 🚜 Armador de Minigranja Lucky (Flota Multi-Dispositivo)](#53--armador-de-minigranja-lucky-flota-multi-dispositivo)
-    - [5.4. 📡 Monitoreo en Red Local (AxeOS / ESP32 REST API)](#54--monitoreo-en-red-local-axeos--esp32-rest-api)
-  - [6. 📈 Mercado en Vivo, Oráculos y Modos de Minería](#6--mercado-en-vivo-oráculos-y-modos-de-minería)
+  - [4. 📦 Análisis Profesional: Goldshell XT Box (Tari XTM)](#4--análisis-profesional-goldshell-xt-box-tari-xtm)
+  - [5. ☀️ Análisis Eléctrico y Clima (Valle Chicama)](#5--análisis-eléctrico-y-clima-valle-chicama)
+  - [6. 🎰 Mineros Lucky y Lotería Solo Mining (BTC y Altcoins)](#6--mineros-lucky-y-lotería-solo-mining-btc-y-altcoins)
+    - [6.1. 🟠 Lotería Solo Bitcoin (BTC)](#61--lotería-solo-bitcoin-btc)
+    - [6.2. 🌐 Lotería Solo en Altcoins (BCH, Kaspa, Doge, Tari)](#62--lotería-solo-en-altcoins-bch-kaspa-doge-tari)
+    - [6.3. 🚜 Armador de Minigranja Lucky (Flota Multi-Dispositivo)](#63--armador-de-minigranja-lucky-flota-multi-dispositivo)
+    - [6.4. 📡 Monitoreo en Red Local (AxeOS / ESP32 REST API)](#64--monitoreo-en-red-local-axeos--esp32-rest-api)
+  - [7. 📈 Mercado en Vivo, Oráculos y Modos de Minería](#7--mercado-en-vivo-oráculos-y-modos-de-minería)
 - [📋 Catálogo de Equipos de Minería](#-catálogo-de-equipos-de-minería)
   - [Catálogo Maestro de Hardware (38 Modelos)](#catálogo-maestro-de-hardware-38-modelos)
   - [Catálogo Especializado de Lotería Solo Bitcoin (13 Modelos)](#catálogo-especializado-de-lotería-solo-bitcoin-13-modelos)
-  - [Catálogo Especializado de Lotería Solo en Altcoins (9 Modelos)](#catálogo-especializado-de-lotería-solo-en-altcoins-9-modelos)
+  - [Catálogo Especializado de Lotería Solo en Altcoins (10 Modelos)](#catálogo-especializado-de-lotería-solo-en-altcoins-10-modelos)
 - [⚡ Matriz Energética de Casa Grande](#-matriz-energética-de-casa-grande)
 - [📐 Arquitectura y Diagramas Interactivos](#-arquitectura-y-diagramas-interactivos)
 - [🤖 Automatización Git y GitHub Actions](#-automatización-git-y-github-actions)
@@ -97,7 +98,24 @@ La aplicación está organizada en 6 pestañas especializadas en la interfaz pri
   - *Modo Overclock / Turbo:* ~920 KSol/s @ 3300W.
 - **Viabilidad en Casa Grande:** Análisis de factibilidad según tarifas de Hidrandina, requisitos de potencia contratada (1 kW doméstico vs 3.3 kW requeridos) y costo de desaduanaje e importación en Perú.
 
-### 4. ☀️ Análisis Eléctrico y Clima (Valle Chicama)
+### 4. 📦 Análisis Profesional: Goldshell XT Box (Tari XTM)
+- **Caso de Estudio Doméstico Ultra Silencioso:** Análisis exhaustivo para el **Goldshell XT Box** (SHA-3x / Tari XTM).
+- **Especificaciones Clave:** 580 GH/s @ 400W, eficiencia de 0.69 J/GH, 35 dB (inaudible a 2 metros, nivel biblioteca).
+- **Matemática Rigurosa de la Red Tari:**
+  - Desglose del carril ASIC SHA-3x (192 bloques/día, ~10,100 XTM/bloque, red global ~450 TH/s).
+  - Participación de 0.129% con producción diaria de ~2,499 XTM/día (~74,980 XTM/mes).
+- **Compatibilidad 100% Residencial en Casa Grande:**
+  - Consume solo 1.82A a 220V, perfectamente compatible con el medidor doméstico estándar de 1.00 kW de Hidrandina (deja 600W libres para electrodomésticos esenciales).
+  - No requiere acometida industrial ni caja acústica de insonorización (ahorro directo de ~S/ 380 en materiales).
+- **Lotería Solo Mining de Alta Frecuencia:**
+  - Probabilidad por bloque de 1 en 776 intentos $\rightarrow$ **1 bloque solitario cazado cada ~4.04 días** (~90 bloques completos al año con premio de ~10,100 XTM por bloque).
+- **Matriz de Sensibilidad Multi-Variable:** Calculadora interactiva y gráfico con barras de sensibilidad mensual ante variaciones de precio de Tari ($XTM), dificultad de red y tarifas de Casa Grande.
+- **Ingeniería Ambiental Valle Chicama:** Protocolo de protección con filtro magnético de 120mm contra la ceniza y broza de quema de cañaverales.
+- **💡 Recomendación Final y Plan de Acción (Parque Fábrica / Casa Grande):**
+  1. *Para conectar hoy en tu sala o dormitorio sin complicaciones:* El **Nuevo Goldshell XT Box (400W)** o empezar con **Goldshell XT Cards (65W)**: ocupan menos del 40% del medidor doméstico de 1.00 kW, no calientan la habitación (35 dB) y pagan su propio recibo de luz dejando la ganancia líquida directamente en tu billetera (~S/ 70 a +S/ 120 Soles netos/mes).
+  2. *Consejo Pro para Casa Grande (Kit Solar Balconero 550W):* Si más adelante instalas un pequeño panel solar balconero de 550W (inversión única de ~S/ 850 soles en el Valle Chicama con microinversor on-grid), ahorrarás ~S/ 70 a S/ 75 soles mensuales de luz directamente en tu recibo de Hidrandina, haciendo que tu ganancia neta suba inmediatamente a más de **+S/ 150 a +S/ 200 Soles netos al mes**.
+
+### 5. ☀️ Análisis Eléctrico y Clima (Valle Chicama)
 - **Dimensionador Solar Fotovoltaico Autónomo:**
   - Basado en la radiación solar real de Casa Grande (**5.8 kWh/m²/día de Horas Sol Pico - HSP**).
   - Cálculo de número de paneles monocristalinos requeridos (550W), capacidad del inversor solar y banco de baterías LiFePO4 a 48V para autonomía 24/7.
@@ -116,32 +134,32 @@ La aplicación está organizada en 6 pestañas especializadas en la interfaz pri
   - Cálculo de flujo de aire volumétrico (**CFM**) para garantizar enfriamiento adecuado según temperatura ambiente (22°C - 32°C).
   - Lista de materiales estimada (BOM) con costos locales en Soles (madera MDF, lana de roca mineral, conductos acústicos aislados, extractor de alta presión).
 
-### 5. 🎰 Mineros Lucky y Lotería Solo Mining (BTC y Altcoins)
+### 6. 🎰 Mineros Lucky y Lotería Solo Mining (BTC y Altcoins)
 
 Estructurado en 4 subpestañas operativas:
 
-#### 5.1. 🟠 Lotería Solo Bitcoin (BTC)
+#### 6.1. 🟠 Lotería Solo Bitcoin (BTC)
 - **Modelado Matemático Riguroso:** Cálculo de probabilidades binomiales exactas para micro mineros (NerdQaxe++ Rev 6.1, Lucky Miner LV08 Pro, LV08, Avalon Nano 3, Bitaxe Gamma 602, Bitforge Nano, NerdMiner v2, etc.).
 - **Pozo Mayor:** Probabilidad de resolver un bloque válido en solitario con recompensa completa (**3.125 BTC + comisiones**, >$250,000 USD).
 - **Comparativa con La Tinka:** Muestra cuántas veces más probable es minar un bloque al año con tu micro minero frente a ganar el pozo mayor de la lotería tradicional peruana (~1 en 45 millones).
 
-#### 5.2. 🌐 Lotería Solo en Altcoins (BCH, Kaspa, Doge, Tari)
+#### 6.2. 🌐 Lotería Solo en Altcoins (BCH, Kaspa, Doge, Tari)
 - **Redes con Menor Dificultad Global:** Simulación para redes donde el poder de cómputo doméstico tiene posibilidades matemáticas exponencialmente mayores:
   - **Bitcoin Cash (BCH):** Misma recompensa de 3.125 monedas (~$1,350 USD) con 140 veces menos hashrate global. Con un NerdQaxe++ o LV08 Pro la probabilidad anual alcanza el 6% - 7%.
   - **Kaspa (KAS):** Alta frecuencia (1 bloque/segundo, 86,400 bloques/día). Con un IceRiver KS0 Ultra (400 GH/s) se promedian ~36 bloques al año.
   - **Dogecoin + Litecoin (LTC/DOGE):** Con mineros Scrypt domésticos (Goldshell Mini-DOGE III o FutureBit Apollo) compitiendo por bloques de 10,000 DOGE (~$850 USD) cada 60 segundos.
-  - **Tari (XTM):** Red PoW joven en SHA-3x accesible con tarjetas de escritorio como Goldshell XT Card (100 GH/s @ 65W).
+  - **Tari (XTM):** Red PoW en SHA-3x accesible con Goldshell XT Box (580 GH/s @ 400W) cazando 1 bloque de ~10,100 XTM cada ~4 días, o Goldshell XT Card (100 GH/s @ 65W).
 
-#### 5.3. 🚜 Armador de Minigranja Lucky (Flota Multi-Dispositivo)
+#### 6.3. 🚜 Armador de Minigranja Lucky (Flota Multi-Dispositivo)
 - **Agregador de Flota:** Combina múltiples modelos y cantidades de micro mineros en una sola matriz.
 - **Telemetría Conjunta:** Calcula hashrate total, consumo eléctrico consolidado, costo mensual de energía en Soles y probabilidad estadística conjunta anual.
 
-#### 5.4. 📡 Monitoreo en Red Local (AxeOS / ESP32 REST API)
+#### 6.4. 📡 Monitoreo en Red Local (AxeOS / ESP32 REST API)
 - **Conexión Directa WiFi / Ethernet:** Consulta en tiempo real las métricas de mineros NerdQaxe, Bitaxe o Lucky Miner conectados a tu red local a través del endpoint `/api/system/info`.
 - **Modo Demostración:** Inspección interactiva inmediata sin necesidad de hardware físico conectado.
 - **Telemetría Reportada:** Hashrate en tiempo real, temperatura de chip, velocidad del ventilador (RPM), voltaje, vatios consumidos, mejor dificultad histórica (`bestDiff`), uptime, pool configurado y versión de firmware.
 
-### 6. 📈 Mercado en Vivo, Oráculos y Modos de Minería
+### 7. 📈 Mercado en Vivo, Oráculos y Modos de Minería
 - **Oráculo Multi-Fuente Redundante en Cascada:**
   1. *Nivel 1:* CoinGecko API (fuente global primaria).
   2. *Nivel 2:* Binance Public Ticker API (latencia ultra baja y alta disponibilidad).
@@ -226,7 +244,7 @@ Equipos optimizados para minería en solitario (Solo Mining) en pools como `solo
 
 ---
 
-### Catálogo Especializado de Lotería Solo en Altcoins (9 Modelos)
+### Catálogo Especializado de Lotería Solo en Altcoins (10 Modelos)
 
 Modelados en `ALT_LUCKY_MINERS_CATALOG` para redes de menor dificultad y probabilidad incrementada:
 
@@ -241,6 +259,7 @@ Modelados en `ALT_LUCKY_MINERS_CATALOG` para redes de menor dificultad y probabi
 | 7 | **FutureBit Apollo LTC / Pod** | LTC + DOGE | Scrypt | 135 MH/s | 100 W | 1.6 PH/s | 10,000 DOGE (~$850 USD) |
 | 8 | **Goldshell Mini-DOGE III Solo** | LTC + DOGE | Scrypt | 700 MH/s | 400 W | 1.6 PH/s | 10,000 DOGE (~$850 USD) |
 | 9 | **Goldshell XT Card** | Tari (XTM) | SHA-3x | 100 GH/s | 65 W | 25 TH/s | 1,200 XTM |
+| 10 | **Goldshell XT Box** | Tari (XTM) | SHA-3x | 580 GH/s | 400 W | 450 TH/s | ~10,100 XTM (~$12 USD) |
 
 ---
 

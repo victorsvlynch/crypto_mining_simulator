@@ -284,13 +284,14 @@ st.markdown("---")
 # ---------------------------------------------------------
 # Pestañas Principales del Dashboard
 # ---------------------------------------------------------
-tab_ranking, tab_simulator, tab_z15, tab_energy, tab_lucky, tab_market = st.tabs([
+tab_ranking, tab_simulator, tab_z15, tab_xtbox, tab_energy, tab_lucky, tab_market = st.tabs([
     "🏆 1. Ranking de Rentabilidad en Casa Grande",
     "🔍 2. Simulador Detallado de un Minero",
     "💎 3. Análisis Profesional: Antminer Z15 Pro",
-    "☀️ 4. Análisis Eléctrico y Clima (Valle Chicama)",
-    "🎰 5. Mineros Lucky (Lotería Solo: BTC y Otras Monedas)",
-    "📈 6. Mercado en Vivo y Explicación Técnica"
+    "📦 4. Análisis Profesional: Goldshell XT Box (Tari XTM)",
+    "☀️ 5. Análisis Eléctrico y Clima (Valle Chicama)",
+    "🎰 6. Mineros Lucky (Lotería Solo: BTC y Otras Monedas)",
+    "📈 7. Mercado en Vivo y Explicación Técnica"
 ])
 
 # =========================================================
@@ -1239,7 +1240,360 @@ with tab_z15:
     )
 
 # =========================================================
-# TAB 4: ANÁLISIS ELÉCTRICO Y CLIMA VALLE CHICAMA
+# TAB 4: ANÁLISIS PROFESIONAL: GOLDSHELL XT BOX (TARI XTM)
+# =========================================================
+with tab_xtbox:
+    st.subheader("📦 Análisis Técnico y Financiero a Fondo: Nuevo Goldshell XT Box (Tari XTM)")
+    st.markdown(
+        """
+        ### ¿Por qué el Goldshell XT Box es la alternativa doméstica perfecta al Z15 Pro en Casa Grande?
+        
+        Mientras que los mineros industriales de alta potencia como el **Antminer Z15 Pro** (2,780W / 75 dB) 
+        demandan acometidas reforzadas y pesadas cajas de insonorización, el **Nuevo Goldshell XT Box** 
+        inaugura la era de los **ASICs de escritorio ultra eficientes (0.69 J/GH)**:
+        consume tan solo **400 Watts** (1.82 Amperios a 220V), opera a **35 dB** (ruido idéntico a una biblioteca) 
+        y está diseñado con chips dedicados para minar **Tari ($XTM)** bajo el algoritmo **SHA-3x**.
+        
+        A continuación se presenta el **desglose matemático riguroso de la red Tari**, su rentabilidad neta 
+        en Soles y Dólares bajo todas las tarifas de Casa Grande, y su **frecuencia de bloque en Solo Mining (1 bloque cada ~4 días)**.
+        """
+    )
+    
+    # 1. Datos en vivo de Tari (Minotari XTM)
+    xtm_price_current = float(prices.get("minotari", 0.00105))
+    if xtm_price_current <= 0:
+        xtm_price_current = 0.00105
+        
+    # Métricas clave del XT Box
+    col_xt1, col_xt2, col_xt3, col_xt4 = st.columns(4)
+    with col_xt1:
+        st.metric("⚡ Hashrate XT Box", "580 GH/s", "SHA-3x (0.58 TH/s)")
+    with col_xt2:
+        st.metric("🔌 Consumo de Pared", "400 Watts", "10.08 kWh/día (PUE 1.05) | 1.82A")
+    with col_xt3:
+        st.metric("🪙 Cotización Tari ($XTM)", f"${xtm_price_current:.6f} USD", f"~S/ {xtm_price_current * fx_rate:.5f}")
+    with col_xt4:
+        st.metric("⛏️ Producción Estimada", "~2,499 XTM / día", "~74,980 XTM / mes")
+
+    st.markdown("---")
+    
+    # SECCIÓN 1: La Fórmula Matemática Real de Minería (Blockchain Tari SHA-3x)
+    st.markdown("#### 1. 📐 La Fórmula Matemática Real de Minería (Blockchain Tari SHA-3x)")
+    st.markdown(
+        f"""
+        La blockchain de **Tari (Minotari)** implementa una arquitectura de consenso híbrida multi-carril, 
+        asignando un porcentaje exclusivo de emisión de bloques a la minería ASIC mediante el algoritmo **SHA-3x**:
+        
+        * **Tiempo Promedio de Bloque en Carril SHA-3x:** ~450 segundos (7.5 minutos) $\\rightarrow$ **192 bloques diarios**.
+        * **Recompensa Base por Bloque:** ~**10,100 XTM** $\\rightarrow$ **~1,939,200 XTM emitidos diariamente** en todo el mundo en el carril SHA-3x.
+        * **Hashrate Global de la Red SHA-3x:** ~**450 TH/s** (450,000 GH/s).
+        * **Participación del XT Box (580 GH/s):** $\\frac{{580\\text{{ GH/s}}}}{{450,000\\text{{ GH/s}}}} \\approx 0.0012889$ (el **0.129%** de la red global).
+        * **XTM Minados al Día por XT Box:** $1,939,200 \\times 0.0012889 \\approx$ **2,499.4 XTM al día** (~**74,980 XTM al mes**).
+        * **Ingreso Bruto Diario:** $2,499.4 \\times \\${xtm_price_current:.6f} \\approx$ **\\${2499.4 * xtm_price_current:.2f} USD / día** (~**S/ {2499.4 * xtm_price_current * fx_rate:.2f} / día**).
+        """
+    )
+
+    st.markdown("---")
+    
+    # SECCIÓN 2: Comparativa de Rentabilidad según Tarifas de Casa Grande
+    st.markdown("#### 2. ⚡ Comparativa de Rentabilidad del Goldshell XT Box según Tarifas de Casa Grande")
+    
+    xt_hw = next((h for h in HARDWARE_CATALOG if h["id"] == "goldshell_xt_box"), None)
+    if xt_hw:
+        scenarios_xt = []
+        for t_k, t_v in TARIFAS_CASA_GRANDE.items():
+            if t_k == "personalizada":
+                continue
+            res_xt = calculate_miner_profitability(
+                hardware=xt_hw,
+                live_prices=prices,
+                tariff_pen_kwh=t_v["rate_pen"],
+                usd_to_pen=fx_rate,
+                pue=selected_pue,
+                pool_fee_pct=pool_fee
+            )
+            scenarios_xt.append({
+                "Suministro Eléctrico": t_v["name"],
+                "Tarifa (S/ / kWh)": f"S/ {t_v['rate_pen']:.2f}",
+                "Gasto Luz Diario": f"S/ {res_xt['daily_power_cost_pen']:,.2f} (${res_xt['daily_power_cost_usd']:.2f})",
+                "Ingreso Diario": f"S/ {res_xt['daily_gross_pen']:,.2f} (${res_xt['daily_gross_usd']:.2f})",
+                "GANANCIA NETA DIARIA": f"{'+' if res_xt['daily_net_usd']>=0 else ''}S/ {res_xt['daily_net_pen']:,.2f} ({'+' if res_xt['daily_net_usd']>=0 else ''}${res_xt['daily_net_usd']:.2f})",
+                "GANANCIA NETA MENSUAL": f"{'+' if res_xt['monthly_net_usd']>=0 else ''}S/ {res_xt['monthly_net_pen']:,.2f} ({'+' if res_xt['monthly_net_usd']>=0 else ''}${res_xt['monthly_net_usd']:.2f})",
+                "Margen %": f"{res_xt['net_margin_pct']}%",
+                "Tiempo Retorno (ROI)": f"{res_xt['roi_days']} días ({res_xt['roi_months']} meses)" if res_xt['roi_days'] else "Tarifa por encima de Breakeven"
+            })
+        st.table(pd.DataFrame(scenarios_xt))
+        
+        breakeven_tar_pen = (2499.4 * xtm_price_current * (1.0 - pool_fee/100.0) * fx_rate) / ((400.0 * selected_pue * 24.0) / 1000.0)
+        breakeven_tar_usd = breakeven_tar_pen / fx_rate
+        st.info(
+            f"🎯 **Punto de Equilibrio Eléctrico (Breakeven):** El XT Box soporta una tarifa de hasta "
+            f"**S/ {breakeven_tar_pen:.2f} / kWh (${breakeven_tar_usd:.3f} USD/kWh)** antes de entrar a pérdida operativa. "
+            f"Con energía solar fotovoltaica Chicama (S/ 0.18/kWh) o tarifa comercial BT5B, el margen neto supera el **75% a 85%**."
+        )
+
+    st.markdown("---")
+
+    # SECCIÓN 3: Cara a Cara Exhaustivo: Bitmain Antminer Z15 Pro vs Goldshell XT Box
+    st.markdown("#### 3. 🥊 Cara a Cara: Bitmain Antminer Z15 Pro (Industrial) vs Goldshell XT Box (Hogar Silencioso)")
+    st.markdown(
+        """
+        Ambos equipos son referentes en minería de alta eficiencia y privacidad, pero están pensados para entornos e infraestructuras eléctricas radicalmente diferentes:
+        """
+    )
+    
+    comparativa_df = pd.DataFrame([
+        {
+            "Criterio de Evaluación": "Criptomoneda y Algoritmo",
+            "Bitmain Antminer Z15 Pro": "Zcash (ZEC) | Equihash 200,9",
+            "Goldshell XT Box": "Tari (XTM) | SHA-3x",
+            "Veredicto Comparativo": "Ambas monedas enfocadas en privacidad criptográfica"
+        },
+        {
+            "Criterio de Evaluación": "Potencia Eléctrica de Pared",
+            "Bitmain Antminer Z15 Pro": "2,780 Watts (66.72 kWh/día)",
+            "Goldshell XT Box": "400 Watts (10.08 kWh/día con PUE)",
+            "Veredicto Comparativo": "El XT Box consume casi 7 veces menos energía"
+        },
+        {
+            "Criterio de Evaluación": "Amperaje Requerido a 220V",
+            "Bitmain Antminer Z15 Pro": "12.63 Amperios continuos (Línea directa 10/12 AWG)",
+            "Goldshell XT Box": "1.82 Amperios continuos (Cualquier enchufe doméstico)",
+            "Veredicto Comparativo": "XT Box es 100% Plug & Play sin obras eléctricas"
+        },
+        {
+            "Criterio de Evaluación": "Compatibilidad Medidor 1.0 kW Casa Grande",
+            "Bitmain Antminer Z15 Pro": "❌ Incompatible (Excede casi 3 veces la potencia contratada)",
+            "Goldshell XT Box": "✅ 100% Compatible (Ocupa solo 400W, deja 600W libres en casa)",
+            "Veredicto Comparativo": "XT Box no dispara el disyuntor de Hidrandina"
+        },
+        {
+            "Criterio de Evaluación": "Nivel de Ruido Acústico",
+            "Bitmain Antminer Z15 Pro": "75 dB (Nivel de aspiradora de taller prendida 24/7)",
+            "Goldshell XT Box": "35 dB (Inaudible a 2 metros, nivel biblioteca o PC gamer)",
+            "Veredicto Comparativo": "XT Box apto para sala, escritorio de dormitorio u oficina"
+        },
+        {
+            "Criterio de Evaluación": "Insonorización Adicional (Caja / Ductos)",
+            "Bitmain Antminer Z15 Pro": "Obligatoria (Gasto extra de ~S/ 380 en Noise Box con lana mineral)",
+            "Goldshell XT Box": "Innecesaria (S/ 0 de costo adicional)",
+            "Veredicto Comparativo": "Ahorro directo en materiales, carpintería y espacio"
+        },
+        {
+            "Criterio de Evaluación": "Inversión Inicial en Hardware (CAPEX)",
+            "Bitmain Antminer Z15 Pro": "~$2,400 USD (~S/ 9,000 PEN)",
+            "Goldshell XT Box": "~$920 USD (~S/ 3,450 PEN)",
+            "Veredicto Comparativo": "XT Box requiere 60% menos capital de entrada"
+        },
+        {
+            "Criterio de Evaluación": "Ingreso Bruto Diario Estimado",
+            "Bitmain Antminer Z15 Pro": "~$48.00 - $52.00 USD/día",
+            "Goldshell XT Box": "~$2.60 - $3.80 USD/día",
+            "Veredicto Comparativo": "Z15 Pro genera mayor volumen bruto absoluto"
+        },
+        {
+            "Criterio de Evaluación": "Perfil de Inversionista Recomendado",
+            "Bitmain Antminer Z15 Pro": "Minería industrial, talleres, casas de campo con planta solar",
+            "Goldshell XT Box": "Hogares urbanos de Casa Grande, departamentos, minería silenciosa",
+            "Veredicto Comparativo": "Complementarios según la infraestructura disponible"
+        }
+    ])
+    st.dataframe(comparativa_df, use_container_width=True, hide_index=True)
+
+    st.markdown("---")
+
+    # SECCIÓN 4: Modalidad Estratégica: Minería en Pool vs Lotería Solo Mining
+    st.markdown("#### 4. 🎰 El Arma Secreta del XT Box: ¿Pool Mining o Lotería Solo Mining?")
+    col_strat1, col_strat2 = st.columns(2)
+    with col_strat1:
+        st.success(
+            f"""
+            **🤝 Estrategia A: Minería en Pool Convencional (Kryptex / Vipor / 2Miners):**
+            * **Flujo Diario Predecible:** Recibes pagos constantes de ~2,400 a 2,500 XTM cada 24 horas.
+            * **Comisión de Pool:** Del 1.0% al 1.5% del total producido.
+            * **Objetivo Financiero:** Amortizar el costo del equipo ($920 USD) pagando mes a mes el recibo de luz de Hidrandina sin sorpresas.
+            """
+        )
+    with col_strat2:
+        st.info(
+            f"""
+            **🎯 Estrategia B: Minería en Solitario (Solo Mining Jackpot):**
+            * **Premio Mayor por Bloque:** ¡**~10,100 XTM** (~${10100 * xtm_price_current:.2f} USD / S/ {10100 * xtm_price_current * fx_rate:.2f}) acreditados al 100% en tu billetera!
+            * **Probabilidad por Bloque:** $\\frac{{580}}{{450,000}} = \\mathbf{{1\\text{{ en }}776}}$ intentos.
+            * **Frecuencia Promedio de Bloque:** A 192 bloques/día, cazas un bloque solitario **cada ~4.04 días**.
+            * **Bloques Anuales Estimados:** ¡**~90 bloques completos al año**!
+            * **Objetivo Financiero:** Acumular decenas de miles de XTM directamente en tu nodo sin pagar comisiones de pool.
+            """
+        )
+
+    st.markdown("---")
+
+    # SECCIÓN 5: Calculadora Interactiva de Sensibilidad Multi-Variable
+    st.markdown("#### 5. 🎛️ Calculadora Interactiva de Sensibilidad Multi-Variable para el XT Box")
+    st.caption("Ajusta el precio proyectado de Tari, la dificultad de la red SHA-3x y la tarifa eléctrica para simular escenarios alcistas o bajistas:")
+    
+    col_x_s1, col_x_s2, col_x_s3 = st.columns(3)
+    with col_x_s1:
+        sens_xt_price = st.slider(
+            "Precio Simulado de Tari XTM (USD $):",
+            min_value=0.000300,
+            max_value=0.006000,
+            value=float(round(xtm_price_current, 6)),
+            step=0.000100,
+            format="$%.6f"
+        )
+    with col_x_s2:
+        sens_xt_nethash = st.slider(
+            "Hashrate Global Red SHA-3x (TH/s):",
+            min_value=150.0,
+            max_value=1200.0,
+            value=450.0,
+            step=25.0
+        )
+    with col_x_s3:
+        sens_xt_tariff = st.slider(
+            "Tarifa Eléctrica Simulada (S/ por kWh):",
+            min_value=0.10,
+            max_value=1.50,
+            value=float(tariff_pen),
+            step=0.02,
+            key="slider_sens_xt_tariff"
+        )
+    
+    # Cálculo interactivo exacto
+    sim_xt_share = 580.0 / (sens_xt_nethash * 1000.0)
+    sim_xt_daily_coins = 192.0 * 10100.0 * sim_xt_share
+    sim_xt_daily_gross_usd = sim_xt_daily_coins * sens_xt_price * (1.0 - (pool_fee / 100.0))
+    sim_xt_daily_gross_pen = sim_xt_daily_gross_usd * fx_rate
+    sim_xt_daily_power_kwh = (400.0 * selected_pue * 24.0) / 1000.0
+    sim_xt_daily_power_pen = sim_xt_daily_power_kwh * sens_xt_tariff
+    sim_xt_daily_power_usd = sim_xt_daily_power_pen / fx_rate
+    sim_xt_daily_net_usd = sim_xt_daily_gross_usd - sim_xt_daily_power_usd
+    sim_xt_daily_net_pen = sim_xt_daily_net_usd * fx_rate
+    sim_xt_monthly_net_usd = sim_xt_daily_net_usd * 30.0
+    sim_xt_monthly_net_pen = sim_xt_daily_net_pen * 30.0
+    
+    mxt_c1, mxt_c2, mxt_c3, mxt_c4 = st.columns(4)
+    with mxt_c1:
+        st.metric("Producción Diaria Simulada", f"{sim_xt_daily_coins:,.0f} XTM", f"~{sim_xt_daily_coins*30:,.0f} XTM/mes")
+    with mxt_c2:
+        st.metric("Ingreso Diario Bruto", f"S/ {sim_xt_daily_gross_pen:,.2f}", f"${sim_xt_daily_gross_usd:.2f} USD")
+    with mxt_c3:
+        st.metric("Costo Luz Diario", f"S/ {sim_xt_daily_power_pen:,.2f}", f"${sim_xt_daily_power_usd:.2f} USD")
+    with mxt_c4:
+        if sim_xt_monthly_net_usd >= 0:
+            st.metric("Ganancia Neta Mensual", f"+S/ {sim_xt_monthly_net_pen:,.2f}", f"+${sim_xt_monthly_net_usd:.2f} USD")
+        else:
+            st.metric("Pérdida Mensual", f"S/ {sim_xt_monthly_net_pen:,.2f}", f"${sim_xt_monthly_net_usd:.2f} USD")
+
+    # Gráfico interactivo de Sensibilidad con Plotly
+    curve_multipliers = [0.5, 0.75, 1.0, 1.5, 2.0, 3.0, 4.0]
+    sens_curve_data = []
+    for mult in curve_multipliers:
+        p_eval = sens_xt_price * mult
+        gross_m = sim_xt_daily_coins * p_eval * (1.0 - (pool_fee / 100.0)) * 30.0
+        net_m = gross_m - (sim_xt_daily_power_usd * 30.0)
+        sens_curve_data.append({
+            "Variación Precio XTM": f"{int((mult - 1.0)*100):+d}% (${p_eval:.5f})",
+            "Ganancia Neta Mensual USD": round(net_m, 2),
+            "Ganancia Neta Mensual PEN": round(net_m * fx_rate, 2),
+            "Ingreso Bruto Mensual USD": round(gross_m, 2)
+        })
+    df_sens_curve = pd.DataFrame(sens_curve_data)
+    fig_sens_xt = px.bar(
+        df_sens_curve,
+        x="Variación Precio XTM",
+        y="Ganancia Neta Mensual USD",
+        title="Proyección de Ganancia Neta Mensual ($ USD) del XT Box según Variación de Precio de Tari",
+        text="Ganancia Neta Mensual USD",
+        color="Ganancia Neta Mensual USD",
+        color_continuous_scale=["#ef5350", "#ffee58", "#26a69a"]
+    )
+    fig_sens_xt.update_traces(texttemplate='$%{text:.2f}', textposition='outside')
+    fig_sens_xt.update_layout(yaxis_title="Ganancia Neta Mensual ($ USD)", xaxis_title="Escenario de Precio XTM", height=380)
+    st.plotly_chart(fig_sens_xt, use_container_width=True)
+
+    st.markdown("---")
+
+    # SECCIÓN 6: Ingeniería de Operación Doméstica en el Valle Chicama
+    st.markdown("#### 6. 🛠️ Ingeniería de Operación Doméstica en el Valle Chicama")
+    col_ing1, col_ing2 = st.columns(2)
+    with col_ing1:
+        st.markdown(
+            """
+            **🔌 1. Instalación Eléctrica y Compatibilidad con Medidor Residencial:**
+            * **Consumo de 400W:** A 220V genera una corriente de solo **1.82 Amperios**.
+            * Puede enchufarse directamente a cualquier tomacorriente de pared estándar (10A / 16A) sin recalentamiento.
+            * En una vivienda de Casa Grande con contrato residencial de **1.00 kW (1,000 Watts)**, el XT Box consume el **40% de la capacidad contratada**, dejando **600 Watts libres** para artefactos esenciales (refrigerador ~150W, TV LED ~100W, router WiFi y focos ~50W).
+            * No requiere refuerzo de acometida ni trámites de aumento de potencia con Hidrandina.
+            """
+        )
+    with col_ing2:
+        st.markdown(
+            """
+            **🌾 2. Disipación Térmica y Protección contra Ceniza de Cañaverales:**
+            * **Calor Emitido:** 400 Watts térmicos equivalen a **1,365 BTU/hr**. Es similar al calor generado por dos consolas de videojuegos. Una ventilación natural o extractor pequeño de 4\" es más que suficiente.
+            * **Cero Contaminación Acústica (35 dB):** Puede colocarse junto a un televisor, escritorio de oficina o pasillo sin causar molestias auditivas ni requerir Noise Box.
+            * **Polvo y Ceniza de Caña (Valle Chicama):** Durante las temporadas de quema de caña de azúcar, se recomienda instalar una **malla antipolvo magnética lavable de 120mm** en la toma de aire trasera y limpiar con aire seco cada 45 a 60 días para mantener el disipador libre de hollín.
+            """
+        )
+
+    st.markdown("---")
+
+    # SECCIÓN 7: Recomendación Final y Plan de Acción para Casa Grande
+    st.markdown("#### 7. 💡 Recomendación Final y Plan de Acción para Casa Grande")
+    st.markdown(
+        """
+        Para maximizar el retorno de inversión y operar con absoluta tranquilidad bajo el suministro de 
+        **Hidrandina (Parque Fábrica / Casa Grande)**:
+        """
+    )
+    
+    col_rec1, col_rec2 = st.columns(2)
+    with col_rec1:
+        st.success(
+            """
+            **🏠 1. Para conectar hoy en tu sala o dormitorio sin complicaciones:**
+            * Elige el **Nuevo Goldshell XT Box (400W)** o empieza con **Goldshell XT Cards (65W)**.
+            * Ocupan **menos del 40% de tu medidor de 1 kW**, dejando 600W a 900W libres para los electrodomésticos de casa.
+            * **Cero calentamiento:** No sobrecargan la habitación ni el cableado doméstico (1.82A a 220V).
+            * **Autosostenible:** Pagan su propio recibo de luz mes a mes dejando la ganancia líquida directamente en tu billetera (~S/ 70 a +S/ 120 Soles netos/mes).
+            """
+        )
+    with col_rec2:
+        st.info(
+            """
+            **☀️ 2. Consejo Pro para Casa Grande (Optimización Solar Balconera):**
+            * Si más adelante instalas un pequeño **panel solar balconero de 550W** (inversión única de **~S/ 850 soles** en el Valle Chicama con microinversor on-grid directo al enchufe).
+            * Ahorrarás **~S/ 70 a S/ 75 soles mensuales de luz** directamente en tu recibo de Hidrandina (~85 kWh/mes generados por el sol de Casa Grande con 5.8 HSP).
+            * **Impacto Inmediato:** Hace que tu ganancia neta suba inmediatamente de ~S/ 70 a **más de +S/ 150 a +S/ 200 Soles netos al mes**, acelerando el retorno de inversión (ROI) a menos de 12 meses.
+            """
+        )
+
+    st.markdown("##### 📈 Proyección Financiera: Minero Solo vs Minero + Panel Balconero 550W:")
+    col_v1, col_v2, col_v3 = st.columns(3)
+    with col_v1:
+        st.metric(
+            "Paso 1: XT Box Solo en Casa",
+            "~+S/ 73.00 / mes",
+            "Paga su propia luz (S/ 258) y deja neto"
+        )
+    with col_v2:
+        st.metric(
+            "Ahorro Panel Balconero 550W",
+            "~S/ 72.50 / mes",
+            "85 kWh solares directos al medidor"
+        )
+    with col_v3:
+        st.metric(
+            "Paso 2: Ganancia Neta Combinada",
+            "~+S/ 145 a +S/ 200 / mes",
+            "ROI acelerado a < 12 meses",
+            delta_color="normal"
+        )
+
+# =========================================================
+# TAB 5: ANÁLISIS ELÉCTRICO Y CLIMA VALLE CHICAMA
 # =========================================================
 with tab_energy:
     st.subheader("☀️ Realidad Energética en Casa Grande y Valle Chicama")

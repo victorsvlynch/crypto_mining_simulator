@@ -346,6 +346,55 @@ def test_profitability_calculations():
     assert peak_res["savings_power_pen"] > 0
     print("Test 9 (Nuevas Mejoras Profesionales): PASSED")
 
+    # Test 10: Validación Específica Goldshell XT Box (Tari XTM)
+    xt_box_hw = next((m for m in HARDWARE_CATALOG if m["id"] == "goldshell_xt_box"), None)
+    assert xt_box_hw is not None, "Goldshell XT Box debe existir en HARDWARE_CATALOG"
+    assert xt_box_hw["algorithm"] == "SHA-3x"
+    assert xt_box_hw["power_watts"] == 400
+    assert xt_box_hw["hashrate"] == 580.0
+    assert xt_box_hw["hashrate_unit"] == "GH/s"
+
+    mock_prices_xtm = dict(mock_prices)
+    mock_prices_xtm["minotari"] = 0.0012
+
+    res_xt_bt5b = calculate_miner_profitability(
+        hardware=xt_box_hw,
+        live_prices=mock_prices_xtm,
+        tariff_pen_kwh=0.84,
+        usd_to_pen=3.75,
+        pue=1.05,
+        pool_fee_pct=1.5
+    )
+    assert res_xt_bt5b["daily_kwh"] == 10.08
+    assert res_xt_bt5b["daily_gross_usd"] > 2.5
+    assert res_xt_bt5b["breakeven_tariff_pen_kwh"] > 0.80
+
+    # Test de Solo Mining en Tari para XT Box
+    xt_solo_hw = next((m for m in ALT_LUCKY_MINERS_CATALOG if m["id"] == "goldshell_xt_box_tari"), None)
+    assert xt_solo_hw is not None, "Goldshell XT Box Solo debe existir en ALT_LUCKY_MINERS_CATALOG"
+    assert xt_solo_hw["hashrate_hs"] == 580.0 * 1e9
+    assert xt_solo_hw["power_watts"] == 400
+
+    solo_xt_res = calculate_alt_lucky_miner_odds(
+        hardware_name=xt_solo_hw["name"],
+        target_coin=xt_solo_hw["target_coin"],
+        coin_symbol=xt_solo_hw["coin_symbol"],
+        hashrate_hs=xt_solo_hw["hashrate_hs"],
+        network_hashrate_hs=xt_solo_hw["network_hashrate_hs"],
+        power_watts=xt_solo_hw["power_watts"],
+        block_time_sec=xt_solo_hw["block_time_sec"],
+        block_reward_coins=xt_solo_hw["block_reward_coins"],
+        coin_price_usd=0.0012,
+        hardware_cost_usd=920.0,
+        tariff_pen_kwh=0.84,
+        usd_to_pen=3.75
+    )
+    assert 700 < solo_xt_res["odds_single_block"] < 850
+    assert 3.5 < solo_xt_res["expected_days_per_block"] < 4.5
+    assert solo_xt_res["expected_blocks_year"] > 80
+    assert solo_xt_res["jackpot_usd"] > 10.0
+    print("Test 10 (Goldshell XT Box Tari XTM Validation): PASSED")
+
 if __name__ == "__main__":
     test_profitability_calculations()
     print("Todas las pruebas pasaron satisfactoriamente.")

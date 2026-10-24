@@ -172,8 +172,8 @@ HARDWARE_CATALOG = [
         "release_year": 2024,
         "noise_db": 35,
         "type": "Minero Doméstico Silencioso",
-        "daily_revenue_base_usd": 3.80,
-        "description": "Nuevo minero ASIC de alta eficiencia (0.69 J/GH) para Tari (XTM) en algoritmo SHA-3x. Con 580 GH/s, consumo de solo 400W y funcionamiento ultra silencioso de 35 dB para el hogar."
+        "daily_revenue_base_usd": 3.00,
+        "description": "Nuevo minero ASIC de alta eficiencia (0.69 J/GH) para Tari (XTM) en algoritmo SHA-3x. Con 580 GH/s (~2,500 XTM/día), consumo de solo 400W (1.82A) y funcionamiento ultra silencioso de 35 dB para el hogar."
     },
     {
         "id": "antminer_z15_pro",
@@ -1136,6 +1136,27 @@ ALT_LUCKY_MINERS_CATALOG = [
         "coin_price_usd_default": 0.0012,
         "badge": "🪙 Red Joven y Baja Dificultad",
         "description": "Tari es una red PoW joven basada en SHA-3x. Con 100 GH/s y solo 65W, cazar bloques en solitario es mucho más frecuente que en redes maduras."
+    },
+    {
+        "id": "goldshell_xt_box_tari",
+        "name": "Goldshell XT Box (Tari XTM Solo)",
+        "target_coin": "Tari (XTM)",
+        "coin_id": "minotari",
+        "coin_symbol": "XTM",
+        "algorithm": "SHA-3x",
+        "hardware_type": "Minero ASIC Doméstico Silencioso (35 dB)",
+        "hashrate_display": "580 GH/s",
+        "hashrate_hs": 580.0 * 1e9,
+        "power_watts": 400,
+        "hardware_cost_usd": 920,
+        "noise_db": 35,
+        "network_hashrate_hs": 450.0 * 1e12, # 450 TH/s
+        "network_display": "450 TH/s (SHA-3x Lane)",
+        "block_time_sec": 450, # ~7.5 min promedio por bloque en carril SHA-3x (192 bloques/día)
+        "block_reward_coins": 10100.0, # ~10,100 XTM por bloque
+        "coin_price_usd_default": 0.0012,
+        "badge": "⚡ 1 BLOQUE CADA ~4 DÍAS EN SOLITARIO",
+        "description": "Con 580 GH/s frente a una red SHA-3x de ~450 TH/s, tu probabilidad de cazar un bloque completo de ~10,100 XTM (~$12 USD) en solitario es de 1 cada ~4.04 días (¡más de 90 bloques al año!)."
     }
 ]
 
