@@ -1,0 +1,10 @@
+# ==============================================================================
+# Archivo de ejemplo de Google Gemini API Keys para auto_push.ps1
+# ==============================================================================
+# Instrucciones de uso:
+# 1. Copia este archivo y renómbralo a "api_keys.txt" en este mismo directorio.
+# 2. Pega una o más API Keys de Google Gemini (una por línea).
+# 3. Este archivo original "api_keys.example.txt" se sube a Git como plantilla,
+#    mientras que "api_keys.txt" está protegido y excluido en .gitignore.
+# ==============================================================================
+# TU_GEMINI_API_KEY_AQUI

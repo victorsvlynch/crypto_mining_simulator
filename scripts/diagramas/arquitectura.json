@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Arquitectura de Sistema - Simulador de Minería Crypto (Casa Grande, Perú)",
+    "output": "arquitectura.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    { "id": "client_web_ui", "type": "frontend", "label": "Streamlit Web UI", "sublabel": "Navegador (:8506)", "pos": [60, 200], "size": [150, 60] },
+    { "id": "report_exporter", "type": "frontend", "label": "Exportador Informes", "sublabel": "CSV & Proyecciones", "pos": [60, 360], "size": [150, 60] },
+    { "id": "streamlit_server", "type": "backend", "label": "Streamlit App Server", "sublabel": "Python 3.11 / Tornado", "pos": [360, 200], "size": [160, 60] },
+    { "id": "config_manager", "type": "backend", "label": "Gestor Parámetros", "sublabel": "PUE & Clima Chicama", "pos": [360, 360], "size": [160, 60] },
+    { "id": "calc_engine", "type": "backend", "label": "Motor de Cálculo", "sublabel": "ROI / Breakeven / Cashflow", "pos": [660, 130], "size": [160, 60] },
+    { "id": "lottery_engine", "type": "backend", "label": "Simulador Solo Mining", "sublabel": "Lucky Miner (Poisson)", "pos": [660, 270], "size": [160, 60] },
+    { "id": "crypto_api_cache", "type": "backend", "label": "Caché de Precios & FX", "sublabel": "Resilient In-Memory", "pos": [660, 410], "size": [160, 60] },
+    { "id": "hardware_catalog", "type": "database", "label": "Catálogo de Hardware", "sublabel": "ASICs / GPUs / Rigs", "pos": [960, 130], "size": [160, 60] },
+    { "id": "tariffs_database", "type": "database", "label": "Tarifario Hidrandina", "sublabel": "BT5B / Comercial / Solar", "pos": [960, 270], "size": [160, 60] },
+    { "id": "docker_runtime", "type": "cloud", "label": "Docker Container", "sublabel": "crypto_mining_simulator", "pos": [960, 410], "size": [160, 60] },
+    { "id": "coingecko_api", "type": "external", "label": "CoinGecko API v3", "sublabel": "Precios en tiempo real", "pos": [1260, 130], "size": [160, 60] },
+    { "id": "exchange_oracle", "type": "external", "label": "Oráculo FX USD/PEN", "sublabel": "Tipo de cambio oficial", "pos": [1260, 270], "size": [160, 60] },
+    { "id": "blockchain_nodes", "type": "external", "label": "Nodos Blockchain", "sublabel": "Dificultad de Red BTC/LTC", "pos": [1260, 410], "size": [160, 60] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "Zona de Usuario / Cliente (Navegador Web)", "wraps": ["client_web_ui", "report_exporter"] },
+    { "kind": "security-group", "label": "Zona de Aplicación Contenedorizada (Docker Runtime :8506)", "wraps": ["streamlit_server", "config_manager", "calc_engine", "lottery_engine", "crypto_api_cache", "hardware_catalog", "tariffs_database", "docker_runtime"] },
+    { "kind": "region", "label": "Zona Externa de Oráculos y APIs Cripto", "wraps": ["coingecko_api", "exchange_oracle", "blockchain_nodes"] }
+  ],
+  "connections": [
+    { "id": "ui-to-server", "from": "client_web_ui", "to": "streamlit_server", "label": "WebSocket & State (:8506)", "variant": "emphasis" },
+    { "id": "server-to-config", "from": "streamlit_server", "to": "config_manager", "label": "Ajuste de PUE & Tarifa" },
+    { "id": "server-to-calc", "from": "streamlit_server", "to": "calc_engine", "label": "Solicita Rentabilidad", "variant": "emphasis" },
+    { "id": "server-to-lottery", "from": "streamlit_server", "to": "lottery_engine", "label": "Probabilidad Solo Block" },
+    { "id": "server-to-cache", "from": "streamlit_server", "to": "crypto_api_cache", "label": "Consulta Cotizaciones" },
+    { "id": "calc-to-hw", "from": "calc_engine", "to": "hardware_catalog", "label": "Especificaciones Técnicas", "variant": "emphasis" },
+    { "id": "calc-to-tariffs", "from": "calc_engine", "to": "tariffs_database", "label": "Costo kWh Hidrandina", "variant": "emphasis" },
+    { "id": "cache-to-coingecko", "from": "crypto_api_cache", "to": "coingecko_api", "label": "HTTPS REST Precios", "variant": "emphasis" },
+    { "id": "cache-to-oracle", "from": "crypto_api_cache", "to": "exchange_oracle", "label": "Tipo de Cambio S/." },
+    { "id": "lottery-to-nodes", "from": "lottery_engine", "to": "blockchain_nodes", "label": "Dificultad de Red" },
+    { "id": "server-to-export", "from": "streamlit_server", "to": "report_exporter", "label": "Descarga de Proyecciones CSV", "variant": "emphasis", "fromSide": "left", "toSide": "right" },
+    { "id": "docker-to-server", "from": "docker_runtime", "to": "streamlit_server", "label": "Healthcheck & Aislamiento", "fromSide": "bottom", "toSide": "top" }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Streamlit Web Dashboard & Visualización",
+      "items": [
+        "Interfaz reactiva moderna construida en Streamlit 1.38+ sobre Python 3.11.",
+        "Visualizaciones dinámicas con gráficos Plotly interactivos para flujo de caja a 24 meses.",
+        "Soporte dual de monedas simultáneo: Soles peruanos (PEN S/) y Dólares americanos (USD $).",
+        "Pestañas modulares: Ranking General de Mineros, Análisis Detallado por Equipo, Calculadora de Lotería Solo Mining y Matriz Energética de Casa Grande."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Motor de Cálculo Financiero (services/calculator.py)",
+      "items": [
+        "Algoritmo financiero para consumo diario, semanal, mensual y anual de kWh.",
+        "Cálculo de ingresos brutos normalizados con precios en vivo y deducción de Pool Fee (1.5%).",
+        "Punto de equilibrio eléctrico (Breakeven electricity rate) para anticipar apagado de equipos.",
+        "Modelado de amortización de capital (CAPEX) y ROI en días y meses con proyección de caja acumulada."
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Estructura Tarifaria Hidrandina & Solar (services/tariffs.py)",
+      "items": [
+        "Parque Fábrica (Recibo Real Suministro 69238413): Tarifa exacta BT5B no residencial (S/ 0.8528/kWh con IGV y ley 28749).",
+        "BT5B Residencial General (S/ 0.84/kWh) y BT3/BT4 Comercial (S/ 0.55/kWh).",
+        "Media Tensión MT2/MT3 Industrial para el Valle Chicama (~S/ 0.34/kWh equivalente a $0.09 USD/kWh).",
+        "Autogeneración Solar Fotovoltaica Chicama amortizada a ~S/ 0.18/kWh aprovechando radiación solar de 5.8 kWh/m²/día.",
+        "Factor de refrigeración PUE ajustable para mitigar el impacto térmico del verano norteño (22°C a 32°C)."
+      ]
+    },
+    {
+      "dot": "orange",
+      "title": "Catálogo de Hardware & Lotería Solo Mining (data/hardware_db.py)",
+      "items": [
+        "Catálogo completo de ASICs: Bitmain Antminer L9 (Scrypt), S21 Pro / S21 XP Hydro (SHA-256), Whatsminer M60S, IceRiver KS5L (kHeavyHash), Goldshell AL-BOX (Blake3).",
+        "Rigs de GPU para Ravencoin (KawPow) y Ethereum Classic (Etchash).",
+        "Módulo Lucky Miner: Modelado estocástico con distribución de Poisson para mineros USB/lotería (Nerdminer, Lucky Miner V6, LV06, Bitaxe Ultra).",
+        "Cálculo de probabilidad matemática diaria, anual y tiempo estimado entre bloques encontrados en solitario (Solo Mining)."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Capa de Resiliencia y Cotizaciones (services/crypto_api.py)",
+      "items": [
+        "Consulta en tiempo real a CoinGecko API v3 (BTC, LTC, DOGE, KAS, ALPH, RVN, ETC, ZEC, XMR, HNT, BCH).",
+        "Caché en memoria con fallback automático para garantizar disponibilidad 100% ante caídas de red o límites de cuota de API (HTTP 429).",
+        "Tipo de cambio oficial USD a PEN actualizado dinámicamente con valor nominal base de seguridad (S/ 3.75)."
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Contenedor Docker y Despliegue en Casa Grande",
+      "items": [
+        "Empaquetado ligero sobre python:3.11-slim con usuario no privilegiado appuser.",
+        "Orquestación mediante Docker Compose con puerto 8506 y política restart: unless-stopped.",
+        "Healthcheck nativo sobre endpoint /_stcore/health para monitoreo de uptime continuo.",
+        "Optimizaciones de memoria y configuración headless integrada para producción."
+      ]
+    }
+  ]
+}

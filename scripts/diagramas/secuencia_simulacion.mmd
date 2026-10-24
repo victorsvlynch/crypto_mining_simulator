@@ -1,0 +1,43 @@
+sequenceDiagram
+    autonumber
+    actor Usuario as 👤 Usuario / Minero
+    participant UI as 🖥️ Streamlit Web UI (:8506)
+    participant Config as ⚙️ Gestor Config & PUE
+    participant API as 📡 Crypto API & Caché
+    participant Oracle as 🌐 CoinGecko / FX
+    participant DB as 💾 Catálogo Hardware
+    participant Calc as 🧮 Motor de Cálculo
+    participant Charts as 📊 Gráficos Plotly & Export
+
+    Usuario->>UI: Abre simulador y selecciona tarifa (ej. BT5B / Solar Chicama)
+    UI->>Config: Carga parámetros de tarifa, PUE y pool fee
+    UI->>API: Solicita cotizaciones actuales (BTC, LTC, DOGE, KAS, etc.)
+    
+    alt Precios en vivo disponibles
+        API->>Oracle: GET /api/v3/simple/price (CoinGecko)
+        Oracle-->>API: Retorna JSON precios USD + FX PEN
+        API->>API: Actualiza caché en memoria
+    else Fallback contingencia
+        API->>API: Carga cotizaciones base offline de respaldo
+    end
+
+    API-->>UI: Entrega diccionario de precios y tipo de cambio
+    UI->>DB: Lee catálogo de ASICs, GPUs y Lucky Miners
+    DB-->>UI: Retorna especificaciones (hashrate, watts, costo, algoritmo)
+
+    UI->>Calc: Ejecuta calculate_miner_profitability / rank_all_miners
+    Calc->>Calc: Calcula consumo kWh (diario, semanal, mensual, anual) con PUE
+    Calc->>Calc: Estima ingresos brutos, costo de energía y utilidad neta (USD y PEN)
+    Calc->>Calc: Computa punto de equilibrio eléctrico (Breakeven S/ por kWh)
+    Calc->>Calc: Genera proyección de flujo de caja acumulado a 24 meses y ROI
+    Calc-->>UI: Retorna matriz de resultados y ranking ordenado
+
+    opt Módulo de Lotería Solo Mining
+        UI->>Calc: Ejecuta calculate_lucky_miner_odds / calculate_alt_lucky_miner_odds
+        Calc->>Calc: Aplica modelo Poisson según dificultad y hashrate del equipo
+        Calc-->>UI: Retorna probabilidades por día/año y tiempo estimado por bloque
+    end
+
+    UI->>Charts: Renderiza gráficos interactivos Plotly y métricas clave
+    Charts-->>UI: Muestra curvas de rentabilidad y tarjetas de resumen
+    UI-->>Usuario: Muestra dashboard interactivo con minero ganador y botón de descarga CSV

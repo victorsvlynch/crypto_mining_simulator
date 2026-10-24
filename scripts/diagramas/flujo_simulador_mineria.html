@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diagrama de Flujo — Simulador de Minería Crypto (Casa Grande, Perú)</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --primary: #3b82f6;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --purple: #8b5cf6;
+      --solar: #eab308;
+    }
+    [data-theme="light"] {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --success: #059669;
+      --warning: #d97706;
+      --purple: #7c3aed;
+      --solar: #ca8a04;
+    }
+    body {
+      margin: 0;
+      padding: 2rem;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      transition: background 0.3s, color 0.3s;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .badge {
+      background: var(--primary);
+      color: white;
+      font-size: 0.75rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      font-weight: 600;
+    }
+    .theme-btn {
+      background: var(--card-bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+    }
+    .theme-btn:hover {
+      border-color: var(--primary);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    .card h3 {
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.1rem;
+    }
+    .tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 0.25rem;
+      margin-top: 0.5rem;
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+    }
+    .tag-energy { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+    .tag-hardware { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .tag-financial { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .steps-list {
+      margin: 0;
+      padding-left: 0;
+      list-style: none;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .steps-list li {
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    .step-num {
+      background: var(--border);
+      color: var(--text);
+      font-weight: 700;
+      font-size: 0.7rem;
+      width: 1.25rem;
+      height: 1.25rem;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 0.1rem;
+    }
+    .diagram-viewer {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      overflow-x: auto;
+    }
+    pre.mermaid {
+      margin: 0;
+      font-family: inherit;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    function updateMermaidTheme(theme) {
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: theme === 'dark' ? 'dark' : 'default',
+        securityLevel: 'loose',
+        fontFamily: 'system-ui, -apple-system, sans-serif'
+      });
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      location.reload();
+    }
+
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateMermaidTheme(savedTheme);
+  </script>
+</head>
+<body>
+  <div>
+    <div class="header">
+      <div>
+        <h1 class="title">
+          ⚡ Simulador de Minería Crypto
+          <span class="badge">Casa Grande, Perú</span>
+        </h1>
+        <p style="margin: 0.25rem 0 0; color: var(--text-muted); font-size: 0.9rem;">
+          Flujo interactivo de ejecución, modelado tarifario de Hidrandina y motor de cálculo de rentabilidad
+        </p>
+      </div>
+      <button class="theme-btn" onclick="toggleTheme()">🌓 Alternar Tema</button>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h3>⚡ Matriz Energética Casa Grande</h3>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">
+          Hidrandina S.A. + Autogeneración Valle Chicama
+        </p>
+        <span class="tag tag-energy">Costos marginales reales por kWh</span>
+        <ul class="steps-list">
+          <li><span class="step-num">1</span> <strong>Recibo Real Parque Fábrica:</strong> S/ 0.8528/kWh (Suministro 69238413, Mz.B Lt.01).</li>
+          <li><span class="step-num">2</span> <strong>BT5B Residencial:</strong> S/ 0.8400/kWh (Estándar domiciliario en Casa Grande).</li>
+          <li><span class="step-num">3</span> <strong>BT3/BT4 Comercial:</strong> S/ 0.5500/kWh (Trifásico talleres y locales comerciales).</li>
+          <li><span class="step-num">4</span> <strong>MT Industrial:</strong> S/ 0.3400/kWh (~$0.09 USD/kWh para granjas con transformador).</li>
+          <li><span class="step-num">5</span> <strong>Solar Chicama:</strong> S/ 0.1800/kWh amortizado (Aprovechando 5.8 kWh/m²/día de radiación).</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>⛏️ Catálogo de Hardware & Algoritmos</h3>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">
+          ASICs de última generación, Rigs y Solo Miners
+        </p>
+        <span class="tag tag-hardware">Eficiencia energética normalizada</span>
+        <ul class="steps-list">
+          <li><span class="step-num">1</span> <strong>Bitmain Antminer L9:</strong> 16.0 GH/s, 3360W en Scrypt (LTC + DOGE merge-mined).</li>
+          <li><span class="step-num">2</span> <strong>Antminer S21 Pro / XP Hydro:</strong> 234 - 473 TH/s en SHA-256 (12 a 15 J/TH).</li>
+          <li><span class="step-num">3</span> <strong>IceRiver KS5L / Goldshell:</strong> kHeavyHash (Kaspa) y Blake3 (Alephium).</li>
+          <li><span class="step-num">4</span> <strong>Rigs GPU:</strong> Minado multicripto para Ravencoin (KawPow) y ETC.</li>
+          <li><span class="step-num">5</span> <strong>Lucky Miners / Lotería:</strong> Nerdminer, Lucky Miner V6, LV06 y Bitaxe Ultra.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>🧮 Motor Financiero & Resiliencia</h3>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">
+          Cálculo dinámico con contingencia offline
+        </p>
+        <span class="tag tag-financial">Métricas en Soles (S/) y Dólares ($)</span>
+        <ul class="steps-list">
+          <li><span class="step-num">1</span> <strong>Cotizaciones en Vivo:</strong> Conexión CoinGecko v3 + Fallback offline resiliente.</li>
+          <li><span class="step-num">2</span> <strong>Factor Climático PUE:</strong> Ajuste de consumo por calor de Casa Grande (22°C - 32°C).</li>
+          <li><span class="step-num">3</span> <strong>Tarifa Breakeven:</strong> Límite de costo eléctrico antes de entrar en pérdida operativa.</li>
+          <li><span class="step-num">4</span> <strong>Flujo 24 Meses & ROI:</strong> Proyección de amortización del hardware y retorno de capital.</li>
+          <li><span class="step-num">5</span> <strong>Lotería Poisson:</strong> Estimación estocástica de probabilidades para minería en solitario.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="diagram-viewer">
+      <h3 style="margin-top: 0; color: var(--primary);">📊 Ciclo de Vida y Flujo de Datos End-to-End</h3>
+      <pre class="mermaid">
+sequenceDiagram
+    autonumber
+    actor Usuario as 👤 Usuario / Minero
+    participant UI as 🖥️ Streamlit Web UI (:8506)
+    participant Config as ⚙️ Gestor Parámetros & PUE
+    participant API as 📡 Crypto API & Caché
+    participant Oracle as 🌐 CoinGecko / FX
+    participant DB as 💾 Catálogo Hardware
+    participant Calc as 🧮 Motor de Cálculo
+    participant Charts as 📊 Gráficos Plotly & Export
+
+    Usuario->>UI: Abre simulador y configura escenario (Tarifa Hidrandina + PUE)
+    UI->>Config: Carga tarifa seleccionada (BT5B, Comercial, Industrial, Solar)
+    UI->>API: Solicita cotizaciones actuales de criptoactivos (BTC, LTC, DOGE, KAS, etc.)
+    
+    alt Conexión API Exitosa
+        API->>Oracle: GET /api/v3/simple/price (CoinGecko)
+        Oracle-->>API: Retorna cotizaciones USD y tipo de cambio PEN
+        API->>API: Almacena en memoria caché
+    else Fallback de Contingencia
+        API->>API: Aplica cotizaciones históricas base sin interrumpir la app
+    end
+
+    API-->>UI: Retorna precios procesados y tasa oficial USD/PEN
+    UI->>DB: Consulta especificaciones de hardware (ASICs, GPUs y Lucky Miners)
+    DB-->>UI: Retorna hashrate, consumo (Watts), costo de compra y algoritmo
+
+    UI->>Calc: Ejecuta evaluación integral (calculate_miner_profitability / rank_all_miners)
+    Calc->>Calc: Calcula consumo real de energía (kWh) aplicando factor PUE
+    Calc->>Calc: Modela ingresos brutos, deducción de pool fee (1.5%) y costo eléctrico
+    Calc->>Calc: Estima utilidad neta en Soles (S/) y Dólares ($) en 4 horizontes temporales
+    Calc->>Calc: Determina tarifa eléctrica de equilibrio (Breakeven S/ por kWh)
+    Calc->>Calc: Simula flujo de caja acumulado a 24 meses y periodo de amortización (ROI)
+    Calc-->>UI: Retorna matriz de rentabilidad y clasificación ordenada
+
+    opt Módulo de Lotería Solo Mining
+        UI->>Calc: Consulta cálculo estocástico (calculate_lucky_miner_odds)
+        Calc->>Calc: Modela función de Poisson según dificultad de red y hashrate
+        Calc-->>UI: Probabilidad diaria/anual y tiempo estimado entre bloques
+    end
+
+    UI->>Charts: Genera visualizaciones Plotly interactivas y tarjetas de KPI
+    Charts-->>UI: Retorna curvas financieras y resumen visual
+    UI-->>Usuario: Muestra dashboard interactivo con minero ganador y descarga de reporte CSV
+      </pre>
+    </div>
+  </div>
+</body>
+</html>

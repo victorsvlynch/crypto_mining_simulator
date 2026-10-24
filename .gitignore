@@ -1,0 +1,91 @@
+# ==============================================================================
+# .gitignore - Crypto Mining Simulator (Casa Grande, Perú - Streamlit & Docker)
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. Entornos Virtuales de Python y Gestores
+# ------------------------------------------------------------------------------
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ------------------------------------------------------------------------------
+# 2. Caché de Python y Compilación Bytecode
+# ------------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ------------------------------------------------------------------------------
+# 3. Streamlit & Archivos de Configuración Local
+# ------------------------------------------------------------------------------
+.streamlit/secrets.toml
+
+# ------------------------------------------------------------------------------
+# 4. Respaldos y Snapshots (Archify)
+# ------------------------------------------------------------------------------
+archives/*.zip
+archives/*.tar.gz
+!archives/.gitkeep
+
+# ------------------------------------------------------------------------------
+# 5. Secretos y Credenciales de Entorno
+# ------------------------------------------------------------------------------
+.env
+.env.local
+.env.*.local
+api_keys.txt
+scripts/auto_push/api_keys.txt
+!scripts/auto_push/api_keys.example.txt
+
+# ------------------------------------------------------------------------------
+# 6. Editores de Código e IDEs
+# ------------------------------------------------------------------------------
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# ------------------------------------------------------------------------------
+# 7. Archivos Ocultos del Sistema Operativo
+# ------------------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Archify temp files
+.archify*
+*.tmp
