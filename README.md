@@ -5,6 +5,7 @@
 [![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)](.github/workflows/ci.yml)
 [![SemVer](https://img.shields.io/badge/Semantic%20Release-Automated-brightgreen?style=for-the-badge)](.github/workflows/release.yml)
+[![Tests](https://img.shields.io/badge/Tests-9%2F9%20Passing-success?style=for-the-badge&logo=pytest&logoColor=white)](tests/test_calculator.py)
 [![Region](https://img.shields.io/badge/Regi%C3%B3n-Valle%20Chicama%20%7C%20Per%C3%BA-red?style=for-the-badge)](https://es.wikipedia.org/wiki/Casa_Grande_(Per%C3%BA))
 
 Simulador técnico, financiero y probabilístico de minería de criptomonedas desarrollado en **Streamlit** y empaquetado en **Docker**. Diseñado con precisión para la realidad energética de **Casa Grande (Provincia de Ascope, Región La Libertad, Perú)**, integrando los pliegos tarifarios oficiales y reales de **Hidrandina S.A.** (Grupo Distriluz), el recurso solar fotovoltaico del Valle Chicama y las exigencias térmicas de la costa norte peruana.
@@ -30,7 +31,7 @@ Simulador técnico, financiero y probabilístico de minería de criptomonedas de
   - [Opción A: Docker Compose (Recomendado)](#opción-a-docker-compose-recomendado)
   - [Opción B: Docker Directo](#opción-b-docker-directo)
   - [Opción C: Entorno Local (Python)](#opción-c-entorno-local-python)
-- [🧪 Pruebas Unitarias](#-pruebas-unitarias)
+- [🧪 Pruebas Unitarias (9 Suites)](#-pruebas-unitarias-9-suites)
 - [🌾 Recomendaciones Operativas para Casa Grande](#-recomendaciones-operativas-para-casa-grande)
 - [📄 Licencia](#-licencia)
 
@@ -38,19 +39,20 @@ Simulador técnico, financiero y probabilístico de minería de criptomonedas de
 
 ## 🎯 Visión General
 
-Minar criptomonedas en el Perú presenta desafíos específicos: las tarifas eléctricas residenciales de Hidrandina en La Libertad rondan los **S/ 0.84 - S/ 0.85 por kWh** (~$0.22 - $0.23 USD/kWh), lo que vuelve no rentable a la mayoría de ASICs tradicionales refrigerados por aire a menos que se opere con esquemas comerciales, industriales o de autogeneración solar.
+Minar criptomonedas en el Perú presenta desafíos específicos: las tarifas eléctricas residenciales de Hidrandina en La Libertad rondan los **S/ 0.84 - S/ 0.85 por kWh** (~$0.22 - $0.25 USD/kWh), lo que vuelve no rentable a la mayoría de ASICs tradicionales refrigerados por aire a menos que se opere con esquemas comerciales, industriales o de autogeneración solar.
 
 Este simulador resuelve esa problemática proporcionando:
 1. **Modelado financiero preciso:** Cálculos en 4 horizontes temporales (24h, 7d, 30d, 365d) simultáneamente en **Dólares Americanos ($ USD)** y **Soles Peruanos (S/)**, con deducción opcional de **OPEX no eléctrico de mantenimiento** (filtros G4 lavables por quema de cañaverales, pasta térmica y recambio de ventiladores).
-2. **Contexto tarifario local de Casa Grande:** Incluyendo la tarifa de suministro real (Recibo Real Parque Fábrica Mz.B Lt.01 a S/ 0.8528/kWh), tarifas comerciales BT3/BT4, industriales MT2/MT3 y energía solar Chicama.
-3. **Discriminación horaria Hidrandina (Peak Shaving / Anti-Punta):** Comparador de operación 24/7 continua vs operación inteligente de 19 horas (apagando durante las 5 horas punta de 18:00 a 23:00 lun-sáb para eliminar el cargo de potencia coincidente en punta).
-4. **Desglose de Merged Mining AuxPoW:** Cálculo transparente de recompensas paralelas en mineros Scrypt (desglose exacto de LTC y DOGE diarios).
-5. **Modelado de climatización (PUE):** Consumo adicional por disipación térmica y ventilación forzada en el clima cálido (22°C - 32°C) del Valle Chicama.
-6. **Resiliencia y envejecimiento:** Proyección a 36 meses con crecimiento de dificultad y Halving, cálculo de precio de apagado (Shutdown Price) y estrategia HODL vs Sell.
-7. **Ingeniería eléctrica y acústica:** Dimensionamiento según el Código Nacional de Electricidad (CNE/NEC) y diseño de cabina silenciadora (Noise Box).
-8. **Lotería Solo Mining:** Probabilidades estadísticas reales para micro mineros (Bitaxe, Lucky Miner, Avalon Nano) comparadas con loterías convencionales como La Tinka.
-9. **Oráculo de Datos Multi-Fuente en Cascada:** Conexión redundante a CoinGecko, Binance Public API, Coinpaprika y Mempool.space en vivo (hashrate de red superando los 1,000 EH/s y dificultad en 140+ T).
-10. **Exportabilidad Completa:** Descarga en un clic de archivos CSV/Excel del ranking general, proyecciones de flujo de caja y lista de materiales (BOM) solar.
+2. **Contexto tarifario local de Casa Grande:** Incluyendo la tarifa de suministro real (`Recibo Real Parque Fábrica Mz.B Lt.01` a S/ 0.8528/kWh), tarifas comerciales BT3/BT4, industriales MT2/MT3 y energía solar Chicama.
+3. **Discriminación horaria Hidrandina (Peak Shaving / Anti-Punta):** Comparador de operación 24/7 continua vs operación inteligente de 19 horas (apagando durante las 5 horas punta de 18:00 a 23:00 lun-sáb para eliminar el cargo de potencia coincidente en punta de ~S/ 48.50/kW-mes).
+4. **Desglose de Merged Mining AuxPoW:** Cálculo transparente de recompensas paralelas en mineros Scrypt (desglose exacto de LTC y DOGE diarios junto con el porcentaje de ingresos de cada moneda).
+5. **Cálculo First-Principles para Bitcoin:** Determinación directa de recompensas a partir de la división de tu hashrate contra el hashrate global real de la red (1,069+ EH/s de mempool.space).
+6. **Modelado de climatización (PUE):** Consumo adicional por disipación térmica y ventilación forzada en el clima cálido (22°C - 32°C) del Valle Chicama.
+7. **Resiliencia y envejecimiento:** Proyección a 36 meses con crecimiento de dificultad y Halving, cálculo de precio de apagado (Shutdown Price) y estrategia HODL vs Sell.
+8. **Ingeniería eléctrica y acústica:** Dimensionamiento según el Código Nacional de Electricidad (CNE/NEC) y diseño de cabina silenciadora (Noise Box).
+9. **Lotería Solo Mining:** Probabilidades estadísticas reales para micro mineros (Bitaxe, Lucky Miner, Avalon Nano) comparadas con loterías convencionales como La Tinka.
+10. **Oráculo de Datos Multi-Fuente en Cascada:** Conexión redundante a CoinGecko, Binance Public API, Coinpaprika y Mempool.space en vivo (hashrate de red superando los 1,000 EH/s y dificultad en 140+ T).
+11. **Exportabilidad Completa:** Descarga en un clic de archivos CSV/Excel del ranking general, proyecciones de flujo de caja y lista de materiales (BOM) solar.
 
 ---
 
@@ -65,14 +67,17 @@ La aplicación está organizada en 6 pestañas especializadas en la interfaz pri
 - **Visualización Gráfica:** Gráfico de barras interactivo de Plotly comparando Ingresos Brutos vs Costo de Electricidad vs Utilidad Neta Mensual.
 - **Tarifa Límite (Breakeven):** Determina el costo máximo en S/ y USD por kWh que tolera cada equipo antes de volverse deficitario.
 - **Comparador Cara a Cara (Head-to-Head):** Comparativa técnica y financiera lado a lado entre dos equipos cualesquiera con radar de eficiencia.
+- **Exportación de Datos:** Botón `📥 Exportar Excel/CSV` para descargar la tabla completa de los 37 mineros clasificados con formato UTF-8 compatible con Microsoft Excel.
 
 ### 2. 🔍 Simulador Detallado de un Minero
 - **Análisis Profundo:** Selección de cualquier equipo o creación de un **Minero 100% Personalizado** (algoritmo, hashrate, potencia, costo de compra).
 - **Desglose en 4 Horizontes:** Ingresos brutos, costo de energía y ganancia neta diaria, semanal, mensual y anual.
-- **Flujo de Caja Acumulado (24 Meses):** Gráfico interactivo que visualiza el punto de equilibrio (Breakeven Point) y el período exacto de retorno de inversión (ROI).
+- **Desglose de Minería Combinada (Merged Mining Scrypt):** Muestra el split diario de producción entre **Litecoin (LTC)** y **Dogecoin (DOGE)** minados en simultáneo sin división de hashrate.
+- **Flujo de Caja Acumulado (24 Meses):** Gráfico interactivo que visualiza el punto de equilibrio (Breakeven Point) y el período exacto de retorno de inversión (ROI), con botón de **descarga de proyección en CSV**.
+- **Simulador de Discriminación Horaria Hidrandina (Peak Shaving):** Evalúa si conviene apagar el equipo en las 5 horas punta (18:00 a 23:00 lun-sáb) para ahorrar el recargo de potencia coincidente en punta (~S/ 48.50/kW-mes) en tarifas BT3, BT4 y MT.
 - **Proyección con Envejecimiento de Dificultad (Difficulty Aging):** Modelo dinámico a 36 meses que simula el incremento mensual del hashrate de la red (ej. +2.5% mensual) y el impacto de los eventos de Halving.
 - **Precio de Apagado (Shutdown Price):** Umbral exacto en la cotización de la criptomoneda en el cual los costos eléctricos superan los ingresos generados.
-- **Estrategia HODL vs Venta Inmediata:** Simulación de retención de monedas a 1, 3, 6 y 12 meses proyectando escenarios alcistas, moderados y conservadores.
+- **Estrategia HODL vs Venta Inmediata:** Simulación de retención de monedas a 1, 2 y 4 años proyectando escenarios conservador, alcista (+50%) y Bull Run máximo (3x).
 - **Exportación de Informes Ejecutivos:** Generación y descarga directa de informes profesionales en formato **HTML auto-contenido**, con tablas financieras, gráficos y formato apto para impresión o presentación a inversores.
 
 ### 3. 💎 Análisis Profesional: Antminer Z15 Pro
@@ -84,38 +89,43 @@ La aplicación está organizada en 6 pestañas especializadas en la interfaz pri
 - **Viabilidad en Casa Grande:** Análisis de factibilidad según tarifas de Hidrandina, requisitos de potencia contratada y costo de desaduanaje e importación en Perú.
 
 ### 4. ☀️ Análisis Eléctrico y Clima (Valle Chicama)
-- **Dimensionador Solar Fotovoltaico:**
+- **Dimensionador Solar Fotovoltaico Autónomo:**
   - Basado en la radiación solar real de Casa Grande (**5.8 kWh/m²/día de Horas Sol Pico - HSP**).
-  - Cálculo de número de paneles monocristalinos requeridos (550W), capacidad del inversor solar y banco de baterías LiFePO4 para autonomía total o parcial.
+  - Cálculo de número de paneles monocristalinos requeridos (550W), capacidad del inversor solar y banco de baterías LiFePO4 a 48V para autonomía 24/7.
+  - **Presupuesto y Lista de Materiales (BOM):** Desglose de paneles Tier 1, baterías, inversor MPPT y protecciones con botón de descarga en CSV.
   - Costo nivelado de energía (LCOE) estimado en **~S/ 0.18 por kWh** (~$0.048 USD/kWh).
 - **Minería Solar Híbrida On-Grid:**
   - Amortización combinada (costo del minero + costo de paneles solares).
-  - Operación mixta: cobertura diurna 100% solar y red nocturna comercial/residencial.
+  - Operación mixta: autoconsumo diurno 100% solar (~6 horas pico) y respaldo de red nocturno.
 - **Seguridad e Instalación Eléctrica (CNE / NEC):**
   - Corriente nominal y corriente de diseño con factor de seguridad continuo del 125%.
-  - Selección de llave termomagnética (curva C) y calibre de conductor en cobre (AWG).
+  - Selección de llave termomagnética (curva C) y calibre de conductor en cobre libre de halógenos N2XH / THW-90 (AWG y mm²).
   - Caída de tensión según distancia de acometida y balance de carga con el medidor de Hidrandina.
   - Disipación térmica en **BTU/hr** y cálculo de toneladas de refrigeración necesarias.
 - **Ingeniería de Cabina Silenciadora (Noise Box):**
   - Atenuación de ruido desde 75-76 dB (ensordecedor) a niveles residenciales seguros (<45 dB).
   - Cálculo de flujo de aire volumétrico (**CFM**) para garantizar enfriamiento adecuado según temperatura ambiente (22°C - 32°C).
-  - Lista de materiales estimada (BOM) con costos locales en Soles (madera MDF, espuma fonoabsorbente ignífuga, conductos acústicos).
+  - Lista de materiales estimada (BOM) con costos locales en Soles (madera MDF, lana de roca mineral, conductos acústicos aislados, extractor de alta presión).
 
 ### 5. 🎰 Mineros Lucky y Lotería Solo Mining (BTC y Altcoins)
 - **Lotería Solo Mining de Bitcoin:**
   - Modelado matemático de probabilidad para micro mineros (Bitaxe Gamma, Lucky Miner LV08, LV08 Pro, Bitforge Nano, Canaan Avalon Nano 3, NerdMiner).
   - Probabilidad exacta de resolver un bloque válido en solitario con recompensa completa (**3.125 BTC + comisiones**, >$250,000 USD).
-  - Comparativa de probabilidades anuales contra ganar el premio mayor de **La Tinka** en Perú.
+  - Comparativa de probabilidades anuales contra ganar el premio mayor de **La Tinka** en Perú (~1 en 45 millones).
 - **Lotería Solo Mining en Altcoins:**
   - Simulación de minado en solitario para redes con menor hashrate global y mayor probabilidad estadística: **Bitcoin Cash (BCH)**, **Kaspa (KAS)**, **Litecoin / Dogecoin (LTC/DOGE)**, **Alephium (ALPH)**, **Ravencoin (RVN)** y **Monero (XMR)**.
 - **Simulador de Flota Multi-Dispositivo:**
   - Cálculo del hashrate agregado, consumo combinado y probabilidad estadística conjunta al operar múltiples micro mineros en simultáneo.
 - **Monitor de Telemetría Local:**
-  - Consulta del estado de mineros conectados en la red local vía API REST / JSON (Bitaxe OS / AxeOS).
+  - Consulta en tiempo real del estado de mineros Bitaxe o Lucky Miner conectados en la red local WiFi vía API REST / JSON (AxeOS / ESP32).
 
 ### 6. 📈 Mercado en Vivo, Oráculos y Modos de Minería
-- **Oráculo de Cotizaciones en Tiempo Real:** Integración con CoinGecko API para 12 criptomonedas clave con sistema de contingencia (fallback offline).
-- **Telemetría de la Red Bitcoin en Vivo:** Conexión con `mempool.space` obteniendo hashrate global (EH/s), dificultad actual (Trillones), altura de bloque, fecha estimada del próximo ajuste de dificultad y tarifas de transacción (sat/vB).
+- **Oráculo Multi-Fuente Redundante en Cascada:**
+  1. *Nivel 1:* CoinGecko API (fuente global).
+  2. *Nivel 2:* Binance Public Ticker API (latencia ultra baja y alta disponibilidad).
+  3. *Nivel 3:* Coinpaprika API (cobertura especializada para KAS y ALPH).
+  4. *Nivel 4:* Valores de referencia offline calibrados ante cortes de red.
+- **Telemetría de la Red Bitcoin en Vivo:** Conexión con `mempool.space` obteniendo hashrate global (**1,069+ EH/s**), dificultad actual (**140+ T**), altura de bloque, fecha estimada del próximo ajuste de dificultad y tarifas de transacción (sat/vB).
 - **Tipo de Cambio Oficial (FX):** Cotización en vivo de USD/PEN vía API de tipos de cambio de referencia.
 - **Comparador de Esquemas de Pago de Pools:** Comparativa entre **FPPS** (Full Pay-Per-Share), **PPLNS** (Pay-Per-Last-N-Shares) y **Solo Mining**.
 - **Glosario Técnico:** Guía conceptual exhaustiva sobre términos clave de minería y energía.
@@ -127,7 +137,7 @@ La aplicación está organizada en 6 pestañas especializadas en la interfaz pri
 El simulador cuenta con una base de datos de 37 equipos debidamente parametrizados en [`data/hardware_db.py`](file:///L:/Streamlit/Crypto_Mining_Simulator/data/hardware_db.py):
 
 | # | Modelo | Fabricante | Algoritmo | Moneda | Hashrate | Consumo | Tipo / Perfil |
-| :-: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| :-: | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | 1 | **Bitmain Antminer L9** | Bitmain | Scrypt | LTC + DOGE | 16.0 GH/s | 3360 W | ASIC Industrial |
 | 2 | **Bitmain Antminer S21 Pro** | Bitmain | SHA-256 | BTC | 234.0 TH/s | 3510 W | ASIC Industrial |
 | 3 | **Bitmain Antminer S21 XP Hydro** | Bitmain | SHA-256 | BTC | 473.0 TH/s | 5676 W | ASIC Hidro |
@@ -174,14 +184,14 @@ Modelada en [`services/tariffs.py`](file:///L:/Streamlit/Crypto_Mining_Simulator
 
 | Tarifa | Nombre del Suministro | S/ por kWh | $ USD/kWh | Perfil de Aplicación |
 | :--- | :--- | :---: | :---: | :--- |
-| **Recibo Real** | **📌 Parque Fábrica Mz.B Lt.01 (Sum. 69238413)** | **S/ 0.853** | **$0.227** | **Costo marginal exacto de recibo real en Casa Grande (BT5B no residencial).** |
-| **BT5B** | Hidrandina Residencial General | S/ 0.840 | $0.224 | Tarifa doméstica estándar para hogares y mineros silenciosos. |
-| **BT3 / BT4** | Hidrandina Comercial / Taller | S/ 0.550 | $0.147 | Conexión trifásica fuera de hora punta para talleres o locales. |
-| **MT2 / MT3** | Hidrandina Media Tensión Industrial | S/ 0.340 | $0.091 | Granja industrial con subestación propia en zonas agroindustriales. |
-| **Solar** | **Autogeneración Solar Fotovoltaica Chicama** | **S/ 0.180** | **$0.048** | **Costo nivelado (LCOE) amortizado gracias a 5.8 kWh/m²/día de radiación.** |
+| **Recibo Real** | **📌 Parque Fábrica Mz.B Lt.01 (Sum. 69238413)** | **S/ 0.853** | **$0.247** | **Costo marginal exacto de recibo real en Casa Grande (BT5B no residencial con IGV y Ley 28749).** |
+| **BT5B** | Hidrandina Residencial General | S/ 0.840 | $0.244 | Tarifa doméstica estándar para hogares y mineros silenciosos. |
+| **BT3 / BT4** | Hidrandina Comercial / Taller | S/ 0.550 | $0.160 | Conexión trifásica fuera de hora punta para talleres o locales. |
+| **MT2 / MT3** | Hidrandina Media Tensión Industrial | S/ 0.340 | $0.099 | Granja industrial con subestación propia en zonas agroindustriales. |
+| **Solar** | **Autogeneración Solar Fotovoltaica Chicama** | **S/ 0.180** | **$0.052** | **Costo nivelado (LCOE) amortizado gracias a 5.8 kWh/m²/día de radiación.** |
 | **Personalizada** | Ingreso Manual de Recibo | Variable | Variable | Permite ingresar exactamente el valor por kWh de tu factura eléctrica. |
-| *Referencia* | Luz del Sur BT5B (Lima Metropolitana) | S/ 0.760 | $0.203 | Comparativa de competitividad vs la capital peruana. |
-| *Referencia* | SEAL BT5B (Arequipa / Sur del Perú) | S/ 0.820 | $0.219 | Comparativa de referencia con el sur del país. |
+| *Referencia* | Luz del Sur BT5B (Lima Metropolitana) | S/ 0.760 | $0.221 | Comparativa de competitividad vs la capital peruana. |
+| *Referencia* | SEAL BT5B (Arequipa / Sur del Perú) | S/ 0.820 | $0.238 | Comparativa de referencia con el sur del país. |
 
 ### Factores PUE por Climatización en Casa Grande
 - **Ventilación Forzada Estándar (Extractores):** `PUE = 1.05` (+5% de consumo eléctrico).
@@ -207,9 +217,10 @@ El proyecto cuenta con especificaciones de arquitectura detalladas en el directo
 Módulo de utilidades operativas ubicado en [`scripts/auto_push/`](file:///L:/Streamlit/Crypto_Mining_Simulator/scripts/auto_push) y pipelines de integración continua en [`.github/workflows/`](file:///L:/Streamlit/Crypto_Mining_Simulator/.github/workflows):
 
 1. **[`auto_push`](file:///L:/Streamlit/Crypto_Mining_Simulator/scripts/auto_push/auto_push.ps1):** Script en PowerShell y Python que automatiza `git add`, `git commit` y `git push`. Emplea la API de **Google Gemini** para inspeccionar las diferencias de código (`git diff`) y generar mensajes semánticos automáticos bajo la convención **Conventional Commits** (`feat:`, `fix:`, `refactor:`, `chore:`).
-2. **[`archify`](file:///L:/Streamlit/Crypto_Mining_Simulator/scripts/auto_push/archify.ps1):** Empaquetador y generador de respaldos seguros hacia [`archives/`](file:///L:/Streamlit/Crypto_Mining_Simulator/archives), filtrando cachés y archivos no deseados.
-3. **CI Pipeline ([`.github/workflows/ci.yml`](file:///L:/Streamlit/Crypto_Mining_Simulator/.github/workflows/ci.yml)):** Ejecuta la batería de pruebas unitarias financieras y valida la sintaxis y construcción del Dockerfile en cada push y pull request.
-4. **Release Pipeline ([`.github/workflows/release.yml`](file:///L:/Streamlit/Crypto_Mining_Simulator/.github/workflows/release.yml)):** Versionado semántico (SemVer) automatizado y generación de Releases en GitHub con changelog autogenerado en cada merge a `main`.
+2. **Plantilla Segura de Llaves ([`api_keys.example.txt`](file:///L:/Streamlit/Crypto_Mining_Simulator/scripts/auto_push/api_keys.example.txt)):** Plantilla pública sin secretos que documenta cómo configurar las credenciales locales de IA excluidas en `.gitignore`.
+3. **[`archify`](file:///L:/Streamlit/Crypto_Mining_Simulator/scripts/auto_push/archify.ps1):** Empaquetador y generador de respaldos seguros hacia [`archives/`](file:///L:/Streamlit/Crypto_Mining_Simulator/archives), filtrando cachés y archivos temporales.
+4. **CI Pipeline ([`.github/workflows/ci.yml`](file:///L:/Streamlit/Crypto_Mining_Simulator/.github/workflows/ci.yml)):** Ejecuta la batería de pruebas unitarias financieras y valida la sintaxis y construcción del Dockerfile en cada push y pull request.
+5. **Release Pipeline ([`.github/workflows/release.yml`](file:///L:/Streamlit/Crypto_Mining_Simulator/.github/workflows/release.yml)):** Versionado semántico (SemVer) automatizado y generación de Releases en GitHub con changelog autogenerado en cada merge a `main`.
 
 ---
 
@@ -227,6 +238,7 @@ Crypto_Mining_Simulator/
 ├── scripts/
 │   ├── auto_push/
 │   │   ├── auto_push.ps1 / .bat / .py # Automatización Git con IA (Gemini)
+│   │   ├── api_keys.example.txt       # Plantilla segura de configuración de API Keys
 │   │   ├── archify.ps1 / .bat         # Generador de respaldos y snapshots limpios
 │   │   └── README.md                  # Documentación del módulo auto_push
 │   └── diagramas/
@@ -237,19 +249,19 @@ Crypto_Mining_Simulator/
 │       ├── render_arquitectura.ps1 / .bat # Compilador de diagramas
 │       └── README.md                  # Documentación del módulo de diagramas
 ├── services/
-│   ├── calculator.py                  # Motor de cálculo financiero, solar, CNE y reportes
-│   ├── crypto_api.py                  # Clientes CoinGecko, mempool.space y FX USD/PEN
+│   ├── calculator.py                  # Motor de cálculo financiero, solar, CNE, peak shaving y reportes
+│   ├── crypto_api.py                  # Oráculos en cascada (CoinGecko, Binance, Coinpaprika, mempool)
 │   └── tariffs.py                     # Pliegos tarifarios Hidrandina y factores PUE
 ├── tests/
-│   └── test_calculator.py             # Suite integral de pruebas unitarias (8 baterías)
+│   └── test_calculator.py             # Suite integral de pruebas unitarias (9 baterías completas)
 ├── .dockerignore                      # Exclusiones de construcción de Docker
-├── .gitignore                         # Exclusiones de control de versiones
+├── .gitignore                         # Exclusiones de control de versiones y secretos
 ├── app.py                             # Aplicación principal Streamlit (UI y Dashboards)
 ├── config.py                          # Parámetros por defecto y configuración visual
 ├── Dockerfile                         # Imagen Docker multi-stage ligera en Python 3.11
 ├── docker-compose.yml                 # Orquestación de servicios en puerto 8506
 ├── README.md                          # Documentación maestra del proyecto
-└── requirements.txt                   # Dependencias de producción (Streamlit, Pandas, Plotly)
+└── requirements.txt                   # Dependencias de producción (Streamlit, Pandas, Plotly, Requests)
 ```
 
 ---
@@ -260,8 +272,8 @@ Crypto_Mining_Simulator/
 
 1. Clona el repositorio y sitúate en la raíz del proyecto:
    ```bash
-   git clone https://github.com/tu-usuario/Crypto_Mining_Simulator.git
-   cd Crypto_Mining_Simulator
+   git clone https://github.com/victorsvlynch/crypto_mining_simulator.git
+   cd crypto_mining_simulator
    ```
 
 2. Construye y levanta el contenedor en segundo plano:
@@ -331,9 +343,9 @@ Si deseas ejecutar o desarrollar directamente en tu máquina:
 
 ---
 
-## 🧪 Pruebas Unitarias
+## 🧪 Pruebas Unitarias (9 Suites)
 
-El proyecto cuenta con una suite completa de pruebas unitarias que valida los algoritmos financieros, conversiones de hashrate, probabilidades de lotería, dimensionamiento solar y reportes HTML:
+El proyecto cuenta con una suite completa de pruebas unitarias que valida los algoritmos financieros, conversiones de hashrate, probabilidades de lotería, dimensionamiento solar, discriminación horaria y reportes HTML:
 
 ```powershell
 # En Windows PowerShell:
@@ -353,6 +365,7 @@ PYTHONPATH=. python3 tests/test_calculator.py
 6. `Test 6:` Probabilidades y recompensas de Lotería Solo en Altcoins (BCH, KAS, LTC, etc.).
 7. `Test 7:` Conversor de hashrate, dimensionador solar, seguridad eléctrica CNE, shutdown price y telemetría de red.
 8. `Test 8:` Suite Pro avanzada: Aging de dificultad con Halving, minería solar híbrida, ingeniería Noise Box y reportes HTML ejecutivos.
+9. `Test 9:` Nuevas Mejoras Profesionales: Peak Shaving Hidrandina (19h vs 24h), Merged Mining Scrypt (LTC + DOGE), OPEX no eléctrico de mantenimiento, cálculo First-Principles para Bitcoin y oráculos redundantes con origen de datos en vivo.
 
 ---
 
@@ -364,10 +377,12 @@ PYTHONPATH=. python3 tests/test_calculator.py
 2. **Dimensionamiento de la Acometida Eléctrica (220V):**
    - La mayoría de acometidas residenciales en Casa Grande tienen potencias contratadas de **1.0 kW a 3.0 kW**, insuficientes para operar múltiples ASICs industriales (ej. un Antminer S21 consume 3.5 kW por sí solo).
    - **Solución:** Para cargas industriales, solicitar ante Hidrandina una ampliación de potencia a tarifa comercial BT3/BT4 o migrar a Media Tensión si se superan los 10 kW.
-3. **Estrategia Térmica para Verano (Diciembre - Abril):**
+3. **Estrategia Horaria Anti-Punta (Peak Shaving):**
+   - Si operas con tarifas comerciales o industriales de Hidrandina, apagar o reducir la frecuencia de los ASICs durante las 5 horas punta (18:00 a 23:00 lun-sáb) elimina el cargo por potencia coincidente en punta, ahorrando hasta ~S/ 48.50 por kW al mes.
+4. **Estrategia Térmica para Verano (Diciembre - Abril):**
    - Las temperaturas ambientales pueden alcanzar los **30°C - 34°C** en el Valle Chicama.
    - **Solución:** Emplear ventilación forzada en presión positiva con extractores de alto caudal (>800 CFM por equipo) o cabinas insonorizadas con toberas de expulsión directa al exterior para evitar recirculación térmica.
-4. **Aprovechamiento del Potencial Solar:**
+5. **Aprovechamiento del Potencial Solar:**
    - Con más de **5.8 HSP promedio anual**, Casa Grande cuenta con una de las radiaciones solares más altas del país. La minería solar híbrida (on-grid diurna) amortiza los paneles solares y reduce drásticamente el costo ponderado por kWh.
 
 ---
