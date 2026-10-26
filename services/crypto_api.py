@@ -23,14 +23,15 @@ DEFAULT_PRICES = {
     "minotari": {"usd": 0.0012, "symbol": "XTM", "name": "Tari"},
     "monero": {"usd": 600.0, "symbol": "XMR", "name": "Monero"},
     "helium": {"usd": 0.41, "symbol": "HNT", "name": "Helium"},
-    "bitcoin-cash": {"usd": 430.0, "symbol": "BCH", "name": "Bitcoin Cash"}
+    "bitcoin-cash": {"usd": 430.0, "symbol": "BCH", "name": "Bitcoin Cash"},
+    "dash": {"usd": 28.5, "symbol": "DASH", "name": "Dash"}
 }
 
 DEFAULT_USD_PEN = 3.75
 
 
 def _fetch_from_coingecko() -> Dict[str, float]:
-    ids = "bitcoin,litecoin,dogecoin,kaspa,alephium,ravencoin,ethereum-classic,zcash,minotari,monero,helium,bitcoin-cash"
+    ids = "bitcoin,litecoin,dogecoin,kaspa,alephium,ravencoin,ethereum-classic,zcash,minotari,monero,helium,bitcoin-cash,dash"
     url = f"https://api.coingecko.com/api/v3/simple/price?ids={ids}&vs_currencies=usd"
     req = urllib.request.Request(
         url,
@@ -56,7 +57,8 @@ def _fetch_from_binance() -> Dict[str, float]:
         "RVNUSDT": "ravencoin",
         "ZECUSDT": "zcash",
         "BCHUSDT": "bitcoin-cash",
-        "HNTUSDT": "helium"
+        "HNTUSDT": "helium",
+        "DASHUSDT": "dash"
     }
     url = "https://api.binance.com/api/v3/ticker/price"
     req = urllib.request.Request(

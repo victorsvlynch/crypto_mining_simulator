@@ -9,7 +9,8 @@ from services.calculator import (
     rank_all_miners,
     generate_cashflow_projection,
     calculate_lucky_miner_odds,
-    calculate_alt_lucky_miner_odds
+    calculate_alt_lucky_miner_odds,
+    calculate_xt_box_solar_schedule
 )
 
 def test_profitability_calculations():
@@ -394,6 +395,58 @@ def test_profitability_calculations():
     assert solo_xt_res["expected_blocks_year"] > 80
     assert solo_xt_res["jackpot_usd"] > 10.0
     print("Test 10 (Goldshell XT Box Tari XTM Validation): PASSED")
+
+    # Test 11: Validación de Nuevos Modelos Incorporados (S21 XP, S23 Hyd, WhatsMiner M70S, Antspace, D9 Dash, etc.)
+    assert len(HARDWARE_CATALOG) >= 125, f"Catálogo debe tener al menos 125 modelos, tiene {len(HARDWARE_CATALOG)}"
+    
+    s21_xp = next((m for m in HARDWARE_CATALOG if m["id"] == "antminer_s21_xp_270t"), None)
+    assert s21_xp is not None and s21_xp["hashrate"] == 270.0 and s21_xp["power_watts"] == 3645
+    
+    s23_hyd = next((m for m in HARDWARE_CATALOG if m["id"] == "antminer_s23_hydro_563t"), None)
+    assert s23_hyd is not None and s23_hyd["hashrate"] == 563.0
+    
+    m70s = next((m for m in HARDWARE_CATALOG if m["id"] == "whatsminer_m70s_254t"), None)
+    assert m70s is not None and m70s["hashrate"] == 254.0 and m70s["efficiency"] == "15.0 J/TH"
+    
+    antspace = next((m for m in HARDWARE_CATALOG if m["id"] == "antspace_hd5_1500kw"), None)
+    assert antspace is not None and antspace["power_watts"] == 1500000
+    
+    d9_dash = next((m for m in HARDWARE_CATALOG if m["id"] == "antminer_d9_1860g"), None)
+    assert d9_dash is not None and d9_dash["coin_id"] == "dash" and d9_dash["algorithm"] == "X11"
+    
+    mock_prices_dash = dict(mock_prices)
+    mock_prices_dash["dash"] = 28.5
+    d9_calc = calculate_miner_profitability(
+        hardware=d9_dash,
+        live_prices=mock_prices_dash,
+        tariff_pen_kwh=0.84,
+        usd_to_pen=3.75
+    )
+    assert d9_calc["daily_gross_usd"] > 0
+    assert d9_calc["daily_kwh"] > 0
+    
+    print("Test 11 (Nuevos Modelos Incorporados): PASSED")
+
+    # Test 12: Validación Horario Solar Híbrido Goldshell XT Box (550W Panel + 400W XT Box)
+    xt_sched = calculate_xt_box_solar_schedule(
+        xtm_price_usd=0.0012,
+        tariff_pen_kwh=0.8528,
+        usd_to_pen=3.75,
+        pue=1.05,
+        pool_fee_pct=1.5,
+        miner_watts=400.0,
+        solar_panel_watts=550.0,
+        solar_hours=8.0,
+        grid_hours=16.0
+    )
+    assert xt_sched["grid_100"]["daily_kwh"] == 10.08
+    assert xt_sched["solar_hybrid"]["daily_kwh"] == 6.72
+    assert xt_sched["savings"]["daily_kwh"] == 3.36
+    assert xt_sched["savings"]["monthly_saved_pen"] > 80.0
+    assert xt_sched["solar_hybrid"]["monthly_net_pen"] > xt_sched["grid_100"]["monthly_net_pen"]
+    assert abs(xt_sched["gross"]["weekly_pen"] - (xt_sched["gross"]["daily_pen"] * 7)) <= 0.05
+    assert abs(xt_sched["gross"]["monthly_pen"] - (xt_sched["gross"]["daily_pen"] * 30)) <= 0.10
+    print("Test 12 (XT Box Solar Schedule 8h Solar / 16h Grid): PASSED")
 
 if __name__ == "__main__":
     test_profitability_calculations()

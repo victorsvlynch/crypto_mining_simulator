@@ -113,7 +113,16 @@ La aplicación está organizada en 6 pestañas especializadas en la interfaz pri
 - **Ingeniería Ambiental Valle Chicama:** Protocolo de protección con filtro magnético de 120mm contra la ceniza y broza de quema de cañaverales.
 - **💡 Recomendación Final y Plan de Acción (Parque Fábrica / Casa Grande):**
   1. *Para conectar hoy en tu sala o dormitorio sin complicaciones:* El **Nuevo Goldshell XT Box (400W)** o empezar con **Goldshell XT Cards (65W)**: ocupan menos del 40% del medidor doméstico de 1.00 kW, no calientan la habitación (35 dB) y pagan su propio recibo de luz dejando la ganancia líquida directamente en tu billetera (~S/ 70 a +S/ 120 Soles netos/mes).
-  2. *Consejo Pro para Casa Grande (Kit Solar Balconero 550W):* Si más adelante instalas un pequeño panel solar balconero de 550W (inversión única de ~S/ 850 soles en el Valle Chicama con microinversor on-grid), ahorrarás ~S/ 70 a S/ 75 soles mensuales de luz directamente en tu recibo de Hidrandina, haciendo que tu ganancia neta suba inmediatamente a más de **+S/ 150 a +S/ 200 Soles netos al mes**.
+  2. *Consejo Pro para Casa Grande (Kit Solar Balconero 550W):* Si más adelante instalas un pequeño panel solar balconero de 550W (inversión única de ~S/ 850 soles en el Valle Chicama con microinversor on-grid), ahorrarás ~S/ 70 a S/ 86 soles mensuales de luz directamente en tu recibo de Hidrandina, haciendo que tu ganancia neta suba inmediatamente a más de **+S/ 150 a +S/ 200 Soles netos al mes**.
+- **🔄 Esquema de Operación Solar Híbrido: Panel 550W + Red Hidrandina (XT Box 400W):**
+  - **[08:00 AM – 04:00 PM]** -> El panel (550W) reduce la carga del minero (400W). Ahorro directo en red.
+  - **[04:00 PM – 08:00 AM]** -> El inversor conmuta automáticamente a Hidrandina sin reiniciar el ASIC.
+- **📊 Tabla Comparativa de Gasto e Ingresos (Diario, Semanal y Mensual - Bruto y Neto):**
+  | Periodo | Ingreso Bruto (Tari XTM) | Gasto Luz (100% Red 24h) | Ganancia Neta (100% Red) | Gasto Luz (Híbrido Solar) | Ganancia Neta (Híbrido Solar) | Ahorro Directo Panel 550W | Margen Neto % |
+  | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+  | **Diario (24h)** | S/ 9.69 ($2.58 USD) | S/ 8.60 ($2.29 USD) | +S/ 1.10 (+$0.29 USD) | S/ 5.73 ($1.53 USD) | +S/ 3.96 (+$1.06 USD) | +S/ 2.87 (+$0.76 USD) | 11.3% ➔ 40.9% |
+  | **Semanal (7d)** | S/ 67.85 ($18.09 USD) | S/ 60.17 ($16.05 USD) | +S/ 7.68 (+$2.05 USD) | S/ 40.12 ($10.70 USD) | +S/ 27.73 (+$7.39 USD) | +S/ 20.06 (+$5.35 USD) | 11.3% ➔ 40.9% |
+  | **Mensual (30d)** | S/ 290.79 ($77.54 USD) | S/ 257.89 ($68.77 USD) | +S/ 32.90 (+$8.77 USD) | S/ 171.92 ($45.85 USD) | +S/ 118.86 (+$31.70 USD) | +S/ 85.96 (+$22.92 USD) | 11.3% ➔ 40.9% |
 
 ### 5. ☀️ Análisis Eléctrico y Clima (Valle Chicama)
 - **Dimensionador Solar Fotovoltaico Autónomo:**

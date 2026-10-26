@@ -33,7 +33,8 @@ from services.calculator import (
     calculate_noise_box_engineering,
     compare_mining_modes,
     generate_html_executive_report,
-    calculate_hidrandina_peak_shaving
+    calculate_hidrandina_peak_shaving,
+    calculate_xt_box_solar_schedule
 )
 
 # ---------------------------------------------------------
@@ -579,7 +580,7 @@ with tab_simulator:
         col_c1, col_c2, col_c3 = st.columns(3)
         with col_c1:
             custom_name = st.text_input("Nombre del Modelo:", value="Mi Minero Personalizado")
-            custom_coin = st.selectbox("Moneda Objetivo:", ["BTC", "LTC + DOGE", "KAS", "ALPH", "Tari (XTM)", "ZEC", "RVN", "ETC"])
+            custom_coin = st.selectbox("Moneda Objetivo:", ["BTC", "LTC + DOGE", "KAS", "ALPH", "Tari (XTM)", "ZEC", "RVN", "ETC", "DASH"])
             coin_id_map = {
                 "BTC": "bitcoin",
                 "LTC + DOGE": "dogecoin_litecoin",
@@ -588,7 +589,8 @@ with tab_simulator:
                 "Tari (XTM)": "minotari",
                 "ZEC": "zcash",
                 "RVN": "ravencoin",
-                "ETC": "ethereum-classic"
+                "ETC": "ethereum-classic",
+                "DASH": "dash"
             }
         with col_c2:
             custom_hash = st.number_input("Hashrate:", min_value=1.0, value=200.0, step=1.0)
@@ -1331,6 +1333,7 @@ with tab_xtbox:
             f"**S/ {breakeven_tar_pen:.2f} / kWh (${breakeven_tar_usd:.3f} USD/kWh)** antes de entrar a pérdida operativa. "
             f"Con energía solar fotovoltaica Chicama (S/ 0.18/kWh) o tarifa comercial BT5B, el margen neto supera el **75% a 85%**."
         )
+        st.caption("💡 *Nota: Para ver el detalle comparativo de gasto e ingresos diario, semanal y mensual (bruto y neto) con el ciclo de conmutación solar [08:00 AM – 04:00 PM / 04:00 PM – 08:00 AM], consulta la Sección 7 al final de esta pestaña.*")
 
     st.markdown("---")
 
@@ -1570,27 +1573,201 @@ with tab_xtbox:
             """
         )
 
-    st.markdown("##### 📈 Proyección Financiera: Minero Solo vs Minero + Panel Balconero 550W:")
-    col_v1, col_v2, col_v3 = st.columns(3)
+    st.markdown("---")
+    st.markdown("#### 🔄 Esquema de Operación Solar Híbrido: Panel 550W + Red Hidrandina (Goldshell XT Box 400W)")
+    
+    # Apartado específico de horarios y conmutación solicitado
+    st.info(
+        """
+        ### ⏱️ Ciclo Diario de Conmutación Automática (Zero-Downtime ATS):
+        
+        * ☀️ **[08:00 AM – 04:00 PM]** ➔ **El panel (550W) reduce la carga del minero (400W). Ahorro directo en red.**
+        * 🌙 **[04:00 PM – 08:00 AM]** ➔ **El inversor conmuta automáticamente a Hidrandina sin reiniciar el ASIC.**
+        """
+    )
+    
+    st.markdown(
+        """
+        **Detalles Técnicos de Ingeniería del Ciclo:**
+        * **☀️ Horario Solar Diurno [08:00 AM – 04:00 PM] (8 Horas):** En el Valle Chicama (Casa Grande), con una radiación promedio de 5.8 Horas Sol Pico (HSP), el panel solar monocristalino de 550W Tier 1 genera potencia suficiente para absorber íntegramente los 400W nominales (420W efectivos con PUE) del XT Box. El consumo demandado a la red de Hidrandina se reduce a **0.00 Watts**, logrando un **ahorro neto directo de 3.36 kWh diarios** (~100.8 kWh al mes sin factura eléctrica).
+        * **🌙 Horario Nocturno y Conmutación [04:00 PM – 08:00 AM] (16 Horas):** Al caer la radiación solar, el microinversor on-grid / switch de transferencia ultrarrápida (<10 ms) conmuta automáticamente a la red pública de Hidrandina. Esto garantiza **cero microcortes**, manteniendo los chips ASIC SHA-3x minando bloques de Tari 24/7 sin caídas de hashrate, sin desconexión de pool y sin reiniciar el firmware.
+        """
+    )
+
+    sched_res = calculate_xt_box_solar_schedule(
+        xtm_price_usd=xtm_price_current,
+        tariff_pen_kwh=tariff_pen,
+        usd_to_pen=fx_rate,
+        pue=selected_pue,
+        pool_fee_pct=pool_fee,
+        miner_watts=400.0,
+        solar_panel_watts=550.0,
+        solar_hours=8.0,
+        grid_hours=16.0
+    )
+
+    m_gross = sched_res["gross"]
+    m_grid = sched_res["grid_100"]
+    m_hybrid = sched_res["solar_hybrid"]
+    m_savings = sched_res["savings"]
+    m_coins = sched_res["coins"]
+
+    st.markdown("##### 📈 Proyección Financiera Mensual: Minero Solo vs Minero + Panel Balconero 550W")
+    col_v1, col_v2, col_v3, col_v4 = st.columns(4)
     with col_v1:
         st.metric(
-            "Paso 1: XT Box Solo en Casa",
-            "~+S/ 73.00 / mes",
-            "Paga su propia luz (S/ 258) y deja neto"
+            "🪙 Ingreso Bruto Mensual",
+            f"S/ {m_gross['monthly_pen']:,.2f}",
+            f"${m_gross['monthly_usd']:,.2f} USD (~{m_coins['monthly']:,.0f} XTM)"
         )
     with col_v2:
         st.metric(
-            "Ahorro Panel Balconero 550W",
-            "~S/ 72.50 / mes",
-            "85 kWh solares directos al medidor"
+            "🔌 Luz Mensual (100% Red)",
+            f"S/ {m_grid['monthly_cost_pen']:,.2f}",
+            f"${m_grid['monthly_cost_usd']:,.2f} USD ({m_grid['monthly_kwh']:.1f} kWh)"
         )
     with col_v3:
         st.metric(
-            "Paso 2: Ganancia Neta Combinada",
-            "~+S/ 145 a +S/ 200 / mes",
-            "ROI acelerado a < 12 meses",
+            "☀️ Ahorro Panel 550W",
+            f"+S/ {m_savings['monthly_saved_pen']:,.2f}",
+            f"+${m_savings['monthly_saved_usd']:,.2f} USD (100.8 kWh solares)",
             delta_color="normal"
         )
+    with col_v4:
+        st.metric(
+            "🚀 Ganancia Neta Híbrida",
+            f"{'+' if m_hybrid['monthly_net_pen']>=0 else ''}S/ {m_hybrid['monthly_net_pen']:,.2f}",
+            f"{'+' if m_hybrid['monthly_net_usd']>=0 else ''}${m_hybrid['monthly_net_usd']:,.2f} USD (+{m_savings['net_improvement_pct']:.0f}% vs red)",
+            delta_color="normal"
+        )
+
+    st.markdown("##### 📊 Tabla Comparativa Detallada de Gasto e Ingresos: Diario, Semanal y Mensual (Bruto y Neto)")
+    st.caption(f"Cálculos calculados dinámicamente según tarifa activa de Casa Grande (**S/ {tariff_pen:.4f}/kWh**), cotización de Tari (**${xtm_price_current:.6f} USD**) y tipo de cambio (**S/ {fx_rate:.2f}**):")
+
+    # Tabla 1: Comparativa Consolidada Cara a Cara
+    df_comparativa_resumen = pd.DataFrame([
+        {
+            "Periodo": "Diario (24 Horas)",
+            "Ingreso Bruto XTM": f"S/ {m_gross['daily_pen']:,.2f} (${m_gross['daily_usd']:.2f})",
+            "Gasto Luz (100% Red 24h)": f"S/ {m_grid['daily_cost_pen']:,.2f} (${m_grid['daily_cost_usd']:.2f})",
+            "Ganancia Neta (100% Red)": f"{'+' if m_grid['daily_net_pen']>=0 else ''}S/ {m_grid['daily_net_pen']:,.2f} ({'+' if m_grid['daily_net_usd']>=0 else ''}${m_grid['daily_net_usd']:.2f})",
+            "Gasto Luz (Híbrido Solar)": f"S/ {m_hybrid['daily_cost_pen']:,.2f} (${m_hybrid['daily_cost_usd']:.2f})",
+            "Ganancia Neta (Híbrido Solar)": f"{'+' if m_hybrid['daily_net_pen']>=0 else ''}S/ {m_hybrid['daily_net_pen']:,.2f} ({'+' if m_hybrid['daily_net_usd']>=0 else ''}${m_hybrid['daily_net_usd']:.2f})",
+            "Ahorro Panel 550W": f"+S/ {m_savings['daily_saved_pen']:,.2f} (+${m_savings['daily_saved_usd']:.2f})",
+            "Margen Neto (Red vs Híbrido)": f"{m_grid['margin_pct']}% ➔ {m_hybrid['margin_pct']}%"
+        },
+        {
+            "Periodo": "Semanal (7 Días)",
+            "Ingreso Bruto XTM": f"S/ {m_gross['weekly_pen']:,.2f} (${m_gross['weekly_usd']:.2f})",
+            "Gasto Luz (100% Red 24h)": f"S/ {m_grid['weekly_cost_pen']:,.2f} (${m_grid['weekly_cost_usd']:.2f})",
+            "Ganancia Neta (100% Red)": f"{'+' if m_grid['weekly_net_pen']>=0 else ''}S/ {m_grid['weekly_net_pen']:,.2f} ({'+' if m_grid['weekly_net_usd']>=0 else ''}${m_grid['weekly_net_usd']:.2f})",
+            "Gasto Luz (Híbrido Solar)": f"S/ {m_hybrid['weekly_cost_pen']:,.2f} (${m_hybrid['weekly_cost_usd']:.2f})",
+            "Ganancia Neta (Híbrido Solar)": f"{'+' if m_hybrid['weekly_net_pen']>=0 else ''}S/ {m_hybrid['weekly_net_pen']:,.2f} ({'+' if m_hybrid['weekly_net_usd']>=0 else ''}${m_hybrid['weekly_net_usd']:.2f})",
+            "Ahorro Panel 550W": f"+S/ {m_savings['weekly_saved_pen']:,.2f} (+${m_savings['weekly_saved_usd']:.2f})",
+            "Margen Neto (Red vs Híbrido)": f"{m_grid['margin_pct']}% ➔ {m_hybrid['margin_pct']}%"
+        },
+        {
+            "Periodo": "Mensual (30 Días)",
+            "Ingreso Bruto XTM": f"S/ {m_gross['monthly_pen']:,.2f} (${m_gross['monthly_usd']:.2f})",
+            "Gasto Luz (100% Red 24h)": f"S/ {m_grid['monthly_cost_pen']:,.2f} (${m_grid['monthly_cost_usd']:.2f})",
+            "Ganancia Neta (100% Red)": f"{'+' if m_grid['monthly_net_pen']>=0 else ''}S/ {m_grid['monthly_net_pen']:,.2f} ({'+' if m_grid['monthly_net_usd']>=0 else ''}${m_grid['monthly_net_usd']:.2f})",
+            "Gasto Luz (Híbrido Solar)": f"S/ {m_hybrid['monthly_cost_pen']:,.2f} (${m_hybrid['monthly_cost_usd']:.2f})",
+            "Ganancia Neta (Híbrido Solar)": f"{'+' if m_hybrid['monthly_net_pen']>=0 else ''}S/ {m_hybrid['monthly_net_pen']:,.2f} ({'+' if m_hybrid['monthly_net_usd']>=0 else ''}${m_hybrid['monthly_net_usd']:.2f})",
+            "Ahorro Panel 550W": f"+S/ {m_savings['monthly_saved_pen']:,.2f} (+${m_savings['monthly_saved_usd']:.2f})",
+            "Margen Neto (Red vs Híbrido)": f"{m_grid['margin_pct']}% ➔ {m_hybrid['margin_pct']}%"
+        }
+    ])
+    st.dataframe(df_comparativa_resumen, use_container_width=True, hide_index=True)
+
+    # Subpestañas con los desgloses detallados
+    tab_view_grid, tab_view_hybrid = st.tabs([
+        "🔌 Desglose Detallado: Operación 100% Red Hidrandina (24h/día)",
+        "☀️ Desglose Detallado: Operación Híbrida Solar Balconera (8h Sol + 16h Red)"
+    ])
+    
+    with tab_view_grid:
+        df_grid_detail = pd.DataFrame([
+            {
+                "Periodo": "Diario (24h)",
+                "Monedas Tari Estimadas": f"~{m_coins['daily']:,.1f} XTM",
+                "Ingreso Bruto (USD)": f"${m_gross['daily_usd']:.2f}",
+                "Ingreso Bruto (PEN)": f"S/ {m_gross['daily_pen']:,.2f}",
+                "Consumo Eléctrico": f"{m_grid['daily_kwh']:.2f} kWh",
+                "Gasto Eléctrico (USD)": f"${m_grid['daily_cost_usd']:.2f}",
+                "Gasto Eléctrico (PEN)": f"S/ {m_grid['daily_cost_pen']:,.2f}",
+                "Ganancia Neta (USD)": f"{'+' if m_grid['daily_net_usd']>=0 else ''}${m_grid['daily_net_usd']:.2f}",
+                "Ganancia Neta (PEN)": f"{'+' if m_grid['daily_net_pen']>=0 else ''}S/ {m_grid['daily_net_pen']:,.2f}",
+                "Margen Neto %": f"{m_grid['margin_pct']}%"
+            },
+            {
+                "Periodo": "Semanal (7 días)",
+                "Monedas Tari Estimadas": f"~{m_coins['weekly']:,.1f} XTM",
+                "Ingreso Bruto (USD)": f"${m_gross['weekly_usd']:.2f}",
+                "Ingreso Bruto (PEN)": f"S/ {m_gross['weekly_pen']:,.2f}",
+                "Consumo Eléctrico": f"{m_grid['weekly_kwh']:.2f} kWh",
+                "Gasto Eléctrico (USD)": f"${m_grid['weekly_cost_usd']:.2f}",
+                "Gasto Eléctrico (PEN)": f"S/ {m_grid['weekly_cost_pen']:,.2f}",
+                "Ganancia Neta (USD)": f"{'+' if m_grid['weekly_net_usd']>=0 else ''}${m_grid['weekly_net_usd']:.2f}",
+                "Ganancia Neta (PEN)": f"{'+' if m_grid['weekly_net_pen']>=0 else ''}S/ {m_grid['weekly_net_pen']:,.2f}",
+                "Margen Neto %": f"{m_grid['margin_pct']}%"
+            },
+            {
+                "Periodo": "Mensual (30 días)",
+                "Monedas Tari Estimadas": f"~{m_coins['monthly']:,.1f} XTM",
+                "Ingreso Bruto (USD)": f"${m_gross['monthly_usd']:.2f}",
+                "Ingreso Bruto (PEN)": f"S/ {m_gross['monthly_pen']:,.2f}",
+                "Consumo Eléctrico": f"{m_grid['monthly_kwh']:.2f} kWh",
+                "Gasto Eléctrico (USD)": f"${m_grid['monthly_cost_usd']:.2f}",
+                "Gasto Eléctrico (PEN)": f"S/ {m_grid['monthly_cost_pen']:,.2f}",
+                "Ganancia Neta (USD)": f"{'+' if m_grid['monthly_net_usd']>=0 else ''}${m_grid['monthly_net_usd']:.2f}",
+                "Ganancia Neta (PEN)": f"{'+' if m_grid['monthly_net_pen']>=0 else ''}S/ {m_grid['monthly_net_pen']:,.2f}",
+                "Margen Neto %": f"{m_grid['margin_pct']}%"
+            }
+        ])
+        st.dataframe(df_grid_detail, use_container_width=True, hide_index=True)
+        st.caption("ℹ️ *En este modo el minero opera 24 horas continuas absorbiendo toda la energía directamente del medidor de Hidrandina.*")
+
+    with tab_view_hybrid:
+        df_hybrid_detail = pd.DataFrame([
+            {
+                "Periodo": "Diario (24h)",
+                "Monedas Tari Estimadas": f"~{m_coins['daily']:,.1f} XTM",
+                "Ingreso Bruto (USD)": f"${m_gross['daily_usd']:.2f}",
+                "Ingreso Bruto (PEN)": f"S/ {m_gross['daily_pen']:,.2f}",
+                "Consumo Red (16h)": f"{m_hybrid['daily_kwh']:.2f} kWh",
+                "Gasto Red (PEN)": f"S/ {m_hybrid['daily_cost_pen']:,.2f}",
+                "Ahorro Solar 550W (PEN)": f"+S/ {m_savings['daily_saved_pen']:,.2f}",
+                "Ganancia Neta (USD)": f"{'+' if m_hybrid['daily_net_usd']>=0 else ''}${m_hybrid['daily_net_usd']:.2f}",
+                "Ganancia Neta (PEN)": f"{'+' if m_hybrid['daily_net_pen']>=0 else ''}S/ {m_hybrid['daily_net_pen']:,.2f}",
+                "Margen Neto %": f"{m_hybrid['margin_pct']}%"
+            },
+            {
+                "Periodo": "Semanal (7 días)",
+                "Monedas Tari Estimadas": f"~{m_coins['weekly']:,.1f} XTM",
+                "Ingreso Bruto (USD)": f"${m_gross['weekly_usd']:.2f}",
+                "Ingreso Bruto (PEN)": f"S/ {m_gross['weekly_pen']:,.2f}",
+                "Consumo Red (16h)": f"{m_hybrid['weekly_kwh']:.2f} kWh",
+                "Gasto Red (PEN)": f"S/ {m_hybrid['weekly_cost_pen']:,.2f}",
+                "Ahorro Solar 550W (PEN)": f"+S/ {m_savings['weekly_saved_pen']:,.2f}",
+                "Ganancia Neta (USD)": f"{'+' if m_hybrid['weekly_net_usd']>=0 else ''}${m_hybrid['weekly_net_usd']:.2f}",
+                "Ganancia Neta (PEN)": f"{'+' if m_hybrid['weekly_net_pen']>=0 else ''}S/ {m_hybrid['weekly_net_pen']:,.2f}",
+                "Margen Neto %": f"{m_hybrid['margin_pct']}%"
+            },
+            {
+                "Periodo": "Mensual (30 días)",
+                "Monedas Tari Estimadas": f"~{m_coins['monthly']:,.1f} XTM",
+                "Ingreso Bruto (USD)": f"${m_gross['monthly_usd']:.2f}",
+                "Ingreso Bruto (PEN)": f"S/ {m_gross['monthly_pen']:,.2f}",
+                "Consumo Red (16h)": f"{m_hybrid['monthly_kwh']:.2f} kWh",
+                "Gasto Red (PEN)": f"S/ {m_hybrid['monthly_cost_pen']:,.2f}",
+                "Ahorro Solar 550W (PEN)": f"+S/ {m_savings['monthly_saved_pen']:,.2f}",
+                "Ganancia Neta (USD)": f"{'+' if m_hybrid['monthly_net_usd']>=0 else ''}${m_hybrid['monthly_net_usd']:.2f}",
+                "Ganancia Neta (PEN)": f"{'+' if m_hybrid['monthly_net_pen']>=0 else ''}S/ {m_hybrid['monthly_net_pen']:,.2f}",
+                "Margen Neto %": f"{m_hybrid['margin_pct']}%"
+            }
+        ])
+        st.dataframe(df_hybrid_detail, use_container_width=True, hide_index=True)
+        st.caption("ℹ️ *En este modo el panel solar balconero de 550W cubre el 100% de la carga del XT Box entre las 08:00 AM y 04:00 PM, y el inversor conmuta automáticamente a Hidrandina el resto del tiempo.*")
 
 # =========================================================
 # TAB 5: ANÁLISIS ELÉCTRICO Y CLIMA VALLE CHICAMA

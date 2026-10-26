@@ -90,6 +90,9 @@ def calculate_miner_profitability(
     elif coin_id == "helium":
         current_p = live_prices.get("helium", 0.41)
         price_scale = current_p / 0.41
+    elif coin_id == "dash":
+        current_p = live_prices.get("dash", 28.5)
+        price_scale = current_p / 28.5
 
     # Cálculo del ingreso bruto diario
     if coin_id == "bitcoin" and use_first_principles_btc:
@@ -836,6 +839,8 @@ def calculate_shutdown_price(
         benchmark = 0.0012
     elif coin_id == "bitcoin-cash":
         benchmark = 430.0
+    elif coin_id == "dash":
+        benchmark = 28.5
 
     # Ingreso = base_rev * (price / benchmark) * 0.985 (pool fee)
     # En el breakeven: daily_power_cost_usd = base_rev * (shutdown_price / benchmark) * 0.985
@@ -1424,6 +1429,179 @@ def calculate_hidrandina_peak_shaving(
         "recommended_mode": recommended_mode,
         "recommendation": recommendation
     }
+
+
+def calculate_xt_box_solar_schedule(
+    xtm_price_usd: float = 0.00105,
+    tariff_pen_kwh: float = 0.8528,
+    usd_to_pen: float = 3.75,
+    pue: float = 1.05,
+    pool_fee_pct: float = 1.5,
+    miner_watts: float = 400.0,
+    solar_panel_watts: float = 550.0,
+    solar_hours: float = 8.0,
+    grid_hours: float = 16.0,
+    network_hashrate_ths: float = 450.0,
+    miner_hashrate_ghs: float = 580.0
+) -> Dict[str, Any]:
+    """
+    Calcula la comparativa financiera detallada de operacion para el Goldshell XT Box (Tari XTM):
+    - Ciclo [08:00 AM - 04:00 PM] (8h): Panel solar 550W absorbe la carga del minero (400W). Ahorro directo en red.
+    - Ciclo [04:00 PM - 08:00 AM] (16h): Inversor conmuta automaticamente a Hidrandina sin reiniciar el ASIC.
+    Retorna metricas desglosadas en Diario, Semanal y Mensual (Bruto, Gasto Electrico, Neto y Ahorro).
+    """
+    # Produccion de monedas en Tari SHA-3x (192 bloques/dia, 10,100 XTM/bloque)
+    network_ghs = max(1.0, network_hashrate_ths * 1000.0)
+    user_share = miner_hashrate_ghs / network_ghs
+    daily_coins = 192.0 * 10100.0 * user_share
+    weekly_coins = daily_coins * 7.0
+    monthly_coins = daily_coins * 30.0
+
+    # Ingreso Bruto tras pool fee
+    fee_mult = 1.0 - (pool_fee_pct / 100.0)
+    daily_gross_usd = daily_coins * xtm_price_usd * fee_mult
+    daily_gross_pen = daily_gross_usd * usd_to_pen
+    weekly_gross_usd = daily_gross_usd * 7.0
+    weekly_gross_pen = daily_gross_pen * 7.0
+    monthly_gross_usd = daily_gross_usd * 30.0
+    monthly_gross_pen = daily_gross_pen * 30.0
+
+    # Consumo de red: 100% Red Hidrandina (24 horas)
+    effective_kw = (miner_watts * pue) / 1000.0
+    daily_grid_kwh = effective_kw * 24.0
+    weekly_grid_kwh = daily_grid_kwh * 7.0
+    monthly_grid_kwh = daily_grid_kwh * 30.0
+
+    daily_grid_cost_pen = daily_grid_kwh * tariff_pen_kwh
+    daily_grid_cost_usd = daily_grid_cost_pen / usd_to_pen
+    weekly_grid_cost_pen = daily_grid_cost_pen * 7.0
+    weekly_grid_cost_usd = daily_grid_cost_usd * 7.0
+    monthly_grid_cost_pen = daily_grid_cost_pen * 30.0
+    monthly_grid_cost_usd = daily_grid_cost_usd * 30.0
+
+    # Consumo de red: Modo Hibrido Solar Balconero (16h red + 8h solar cubiertas por panel 550W)
+    daily_hybrid_grid_kwh = effective_kw * grid_hours
+    weekly_hybrid_grid_kwh = daily_hybrid_grid_kwh * 7.0
+    monthly_hybrid_grid_kwh = daily_hybrid_grid_kwh * 30.0
+
+    daily_hybrid_cost_pen = daily_hybrid_grid_kwh * tariff_pen_kwh
+    daily_hybrid_cost_usd = daily_hybrid_cost_pen / usd_to_pen
+    weekly_hybrid_cost_pen = daily_hybrid_cost_pen * 7.0
+    weekly_hybrid_cost_usd = daily_hybrid_cost_usd * 7.0
+    monthly_hybrid_cost_pen = daily_hybrid_cost_pen * 30.0
+    monthly_hybrid_cost_usd = daily_hybrid_cost_usd * 30.0
+
+    # Ahorro directo en red por el panel de 550W (8 horas solares diarias)
+    daily_saved_kwh = daily_grid_kwh - daily_hybrid_grid_kwh
+    weekly_saved_kwh = daily_saved_kwh * 7.0
+    monthly_saved_kwh = daily_saved_kwh * 30.0
+
+    daily_saved_pen = daily_saved_kwh * tariff_pen_kwh
+    daily_saved_usd = daily_saved_pen / usd_to_pen
+    weekly_saved_pen = weekly_saved_kwh * tariff_pen_kwh
+    weekly_saved_usd = weekly_saved_pen / usd_to_pen
+    monthly_saved_pen = monthly_saved_kwh * tariff_pen_kwh
+    monthly_saved_usd = monthly_saved_pen / usd_to_pen
+
+    # Ganancia Neta: 100% Red Hidrandina
+    daily_net_grid_usd = daily_gross_usd - daily_grid_cost_usd
+    daily_net_grid_pen = daily_gross_pen - daily_grid_cost_pen
+    weekly_net_grid_usd = weekly_gross_usd - weekly_grid_cost_usd
+    weekly_net_grid_pen = weekly_gross_pen - weekly_grid_cost_pen
+    monthly_net_grid_usd = monthly_gross_usd - monthly_grid_cost_usd
+    monthly_net_grid_pen = monthly_gross_pen - monthly_grid_cost_pen
+    margin_grid_pct = (daily_net_grid_usd / daily_gross_usd * 100.0) if daily_gross_usd > 0 else 0.0
+
+    # Ganancia Neta: Modo Hibrido Solar Balconero
+    daily_net_hybrid_usd = daily_gross_usd - daily_hybrid_cost_usd
+    daily_net_hybrid_pen = daily_gross_pen - daily_hybrid_cost_pen
+    weekly_net_hybrid_usd = weekly_gross_usd - weekly_hybrid_cost_usd
+    weekly_net_hybrid_pen = weekly_gross_pen - weekly_hybrid_cost_pen
+    monthly_net_hybrid_usd = monthly_gross_usd - monthly_hybrid_cost_usd
+    monthly_net_hybrid_pen = monthly_gross_pen - monthly_hybrid_cost_pen
+    margin_hybrid_pct = (daily_net_hybrid_usd / daily_gross_usd * 100.0) if daily_gross_usd > 0 else 0.0
+
+    # Mejora en Ganancia Neta
+    if monthly_net_grid_usd > 0:
+        net_improvement_pct = ((monthly_net_hybrid_usd - monthly_net_grid_usd) / monthly_net_grid_usd) * 100.0
+    else:
+        net_improvement_pct = 100.0 if monthly_net_hybrid_usd > 0 else 0.0
+
+    return {
+        "params": {
+            "xtm_price_usd": xtm_price_usd,
+            "tariff_pen_kwh": tariff_pen_kwh,
+            "usd_to_pen": usd_to_pen,
+            "pue": pue,
+            "pool_fee_pct": pool_fee_pct,
+            "miner_watts": miner_watts,
+            "solar_panel_watts": solar_panel_watts,
+            "solar_hours": solar_hours,
+            "grid_hours": grid_hours,
+        },
+        "coins": {
+            "daily": round(daily_coins, 1),
+            "weekly": round(weekly_coins, 1),
+            "monthly": round(monthly_coins, 1)
+        },
+        "gross": {
+            "daily_usd": round(daily_gross_usd, 2),
+            "daily_pen": round(daily_gross_pen, 2),
+            "weekly_usd": round(weekly_gross_usd, 2),
+            "weekly_pen": round(weekly_gross_pen, 2),
+            "monthly_usd": round(monthly_gross_usd, 2),
+            "monthly_pen": round(monthly_gross_pen, 2),
+        },
+        "grid_100": {
+            "daily_kwh": round(daily_grid_kwh, 2),
+            "weekly_kwh": round(weekly_grid_kwh, 2),
+            "monthly_kwh": round(monthly_grid_kwh, 2),
+            "daily_cost_usd": round(daily_grid_cost_usd, 2),
+            "daily_cost_pen": round(daily_grid_cost_pen, 2),
+            "weekly_cost_usd": round(weekly_grid_cost_usd, 2),
+            "weekly_cost_pen": round(weekly_grid_cost_pen, 2),
+            "monthly_cost_usd": round(monthly_grid_cost_usd, 2),
+            "monthly_cost_pen": round(monthly_grid_cost_pen, 2),
+            "daily_net_usd": round(daily_net_grid_usd, 2),
+            "daily_net_pen": round(daily_net_grid_pen, 2),
+            "weekly_net_usd": round(weekly_net_grid_usd, 2),
+            "weekly_net_pen": round(weekly_net_grid_pen, 2),
+            "monthly_net_usd": round(monthly_net_grid_usd, 2),
+            "monthly_net_pen": round(monthly_net_grid_pen, 2),
+            "margin_pct": round(margin_grid_pct, 1)
+        },
+        "solar_hybrid": {
+            "daily_kwh": round(daily_hybrid_grid_kwh, 2),
+            "weekly_kwh": round(weekly_hybrid_grid_kwh, 2),
+            "monthly_kwh": round(monthly_hybrid_grid_kwh, 2),
+            "daily_cost_usd": round(daily_hybrid_cost_usd, 2),
+            "daily_cost_pen": round(daily_hybrid_cost_pen, 2),
+            "weekly_cost_usd": round(weekly_hybrid_cost_usd, 2),
+            "weekly_cost_pen": round(weekly_hybrid_cost_pen, 2),
+            "monthly_cost_usd": round(monthly_hybrid_cost_usd, 2),
+            "monthly_cost_pen": round(monthly_hybrid_cost_pen, 2),
+            "daily_net_usd": round(daily_net_hybrid_usd, 2),
+            "daily_net_pen": round(daily_net_hybrid_pen, 2),
+            "weekly_net_usd": round(weekly_net_hybrid_usd, 2),
+            "weekly_net_pen": round(weekly_net_hybrid_pen, 2),
+            "monthly_net_usd": round(monthly_net_hybrid_usd, 2),
+            "monthly_net_pen": round(monthly_net_hybrid_pen, 2),
+            "margin_pct": round(margin_hybrid_pct, 1)
+        },
+        "savings": {
+            "daily_kwh": round(daily_saved_kwh, 2),
+            "weekly_kwh": round(weekly_saved_kwh, 2),
+            "monthly_kwh": round(monthly_saved_kwh, 2),
+            "daily_saved_usd": round(daily_saved_usd, 2),
+            "daily_saved_pen": round(daily_saved_pen, 2),
+            "weekly_saved_usd": round(weekly_saved_usd, 2),
+            "weekly_saved_pen": round(weekly_saved_pen, 2),
+            "monthly_saved_usd": round(monthly_saved_usd, 2),
+            "monthly_saved_pen": round(monthly_saved_pen, 2),
+            "net_improvement_pct": round(net_improvement_pct, 1)
+        }
+    }
+
 
 
 
