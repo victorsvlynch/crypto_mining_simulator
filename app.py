@@ -314,7 +314,7 @@ with tab_ranking:
     with col_s1:
         search_query = st.text_input(
             "🔍 Buscar por modelo, fabricante, chip o moneda:",
-            placeholder="Ej: NerdQaxe, LV08, BM1370, Bitmain, Z15, Kaspa, Bitaxe, 4nm..."
+            placeholder="Ej: RTX 5070 Ti, Pearl, AI, ASUS, NerdQaxe, LV08, BM1370, Bitmain, Z15, Kaspa, Bitaxe..."
         ).strip().lower()
 
     all_manufacturers = sorted(list({m.get("manufacturer", "Otro") for m in HARDWARE_CATALOG if m.get("manufacturer")}))
@@ -580,7 +580,7 @@ with tab_simulator:
         col_c1, col_c2, col_c3 = st.columns(3)
         with col_c1:
             custom_name = st.text_input("Nombre del Modelo:", value="Mi Minero Personalizado")
-            custom_coin = st.selectbox("Moneda Objetivo:", ["BTC", "LTC + DOGE", "KAS", "ALPH", "Tari (XTM)", "ZEC", "RVN", "ETC", "DASH"])
+            custom_coin = st.selectbox("Moneda Objetivo:", ["BTC", "LTC + DOGE", "KAS", "ALPH", "Tari (XTM)", "ZEC", "RVN", "ETC", "DASH", "Pearl (PRL)", "AI Compute (USD)"])
             coin_id_map = {
                 "BTC": "bitcoin",
                 "LTC + DOGE": "dogecoin_litecoin",
@@ -590,7 +590,9 @@ with tab_simulator:
                 "ZEC": "zcash",
                 "RVN": "ravencoin",
                 "ETC": "ethereum-classic",
-                "DASH": "dash"
+                "DASH": "dash",
+                "Pearl (PRL)": "pearl",
+                "AI Compute (USD)": "ai_compute"
             }
         with col_c2:
             custom_hash = st.number_input("Hashrate:", min_value=1.0, value=200.0, step=1.0)
@@ -642,6 +644,39 @@ with tab_simulator:
         sc3.markdown(f"**Consumo Diario ({sim_res['operating_hours_per_day']}h):** {sim_res['daily_kwh']} kWh/día")
         sc4.markdown(f"**Costo de Hardware:** ${sim_res['hardware_cost_usd']:,} USD")
         sc4.markdown(f"**Inversión en Soles:** S/ {sim_res['hardware_cost_pen']:,.2f}")
+
+    # Guía Especializada si se selecciona una GPU RTX 5070 Ti, Pearl o Alquiler IA
+    if "5070" in sim_res.get("id", "") or sim_res.get("coin_id") in ("pearl", "ai_compute"):
+        with st.expander("💡 Guía Especializada: ASUS PRIME GeForce RTX 5070 Ti 16GB OC (PRIME-RTX5070TI-O16G) | Pearl & IA", expanded=True):
+            st.markdown(
+                """
+                ### 🚀 Tarjeta Gráfica ASUS PRIME GeForce RTX 5070 Ti 16GB GDDR7 OC Edition
+                * **Part Number Oficial:** `PRIME-RTX5070TI-O16G`
+                * **Arquitectura:** NVIDIA Blackwell (GB203, TSMC 4N) &bull; **8,960 Núcleos CUDA** &bull; 280 Tensor Cores (FP8/FP4).
+                * **Memoria VRAM:** **16 GB GDDR7** de 28 Gbps con bus de 256-bit (**896 GB/s** de ancho de banda ultrarrápido).
+                * **Conectividad y Refrigeración:** 1x HDMI 2.1b, 3x DisplayPort 2.1b, triple ventilador Axial-tech silencioso (36 dB) con modo 0dB.
+                * **Alimentación:** 1x 16-pin (12V-2x6 PCIe 5.0) &bull; TDP Stock 300W &bull; Consumo en minería/IA optimizada: **~195W - 210W (0.95A en 220V)**.
+                
+                ---
+                #### ⛏️ Opción A: Minería PoUW de Pearl (PRL)
+                * **Algoritmo PearlHash:** Basado en `NoisyGEMM` (multiplicación de matrices tensoriales densas) diseñado para reflejar el cómputo de redes neuronales.
+                * **Hashrate Estimado:** **~182.0 Th/s** consumiendo solo **210 Watts** con perfil undervolt (Power Limit al 70%, Memoria +1000 MHz).
+                * **Software Compatible:** *SRBMiner-MULTI*, *BzMiner*, *WildRig Multi* o *HiveOS / SimpleMining*.
+                * **Ventaja:** Descentralizado, no requiere IP pública fija ni contratos de nivel de servicio (SLA); acumulación directa de monedas Pearl (PRL).
+
+                ---
+                #### 🤖 Opción B: Alquiler de Cómputo para Inteligencia Artificial (Cloud GPU Hosting)
+                * **Plataformas de Alquiler:** *Vast.ai*, *Clore.ai*, *RunPod*, *io.net*.
+                * **Cargas de Trabajo Ideales:** Despliegue de LLMs de 7B a 9B en *vLLM / Ollama* (Llama-3.1 8B, Mistral 7B, Gemma 2 9B), generación de imágenes con *FLUX.1 Schnell* y *Stable Diffusion XL*, inferencia y fine-tuning LoRA.
+                * **Tarifa de Mercado:** **$0.22 a $0.28 USD / hora** (~$5.20 USD brutos por día con 85% de ocupación).
+                * **Ventaja:** Ingresos en USD o USDT estables con alta resiliencia frente a la volatilidad cripto.
+
+                ---
+                #### ⚡ Viabilidad Eléctrica en Casa Grande (Hidrandina)
+                * Con solo **210 Watts**, el equipo consume **0.95 Amperios en 220V**, operando con absoluta seguridad en el medidor residencial estándar de 1.0 kW sin riesgo de sobrecarga.
+                * Costo de luz en Casa Grande (BT5B S/ 0.8528/kWh): apenas **S/ 4.30 / día** (~$1.15 USD). ¡Te deja una ganancia neta líquida diaria superior a S/ 11.00 - S/ 15.00 PEN!
+                """
+            )
 
     # Desglose de Merged Mining AuxPoW si aplica (Scrypt)
     if sim_res.get("merged_breakdown"):
@@ -2700,11 +2735,14 @@ with tab_market:
     st.subheader("📈 Precios Actuales de Criptomonedas Minables")
     st.markdown("Cotizaciones en tiempo real utilizadas en los cálculos de este simulador:")
 
-    cols = st.columns(len(prices))
-    for i, (coin, p_val) in enumerate(prices.items()):
-        with cols[i]:
-            symbol = coin.upper()[:4]
-            st.metric(label=coin.replace("-", " ").title(), value=f"${p_val:,.4f}" if p_val < 1 else f"${p_val:,.2f}")
+    price_items = list(prices.items())
+    num_cols = 5
+    for row_start in range(0, len(price_items), num_cols):
+        chunk = price_items[row_start:row_start + num_cols]
+        cols = st.columns(num_cols)
+        for idx, (coin, p_val) in enumerate(chunk):
+            with cols[idx]:
+                st.metric(label=coin.replace("-", " ").replace("_", " ").title(), value=f"${p_val:,.4f}" if p_val < 1 else f"${p_val:,.2f}")
 
     st.markdown("---")
     st.subheader("🌐 Métricas Macro de la Red Bitcoin (Datos Globales)")

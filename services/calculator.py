@@ -34,17 +34,26 @@ def calculate_miner_profitability(
     
     # 1. Determinar precio del activo y factor de escala
     base_rev = hardware.get("daily_revenue_base_usd", 10.0)
+
+    def _get_price(k: str, default: float) -> float:
+        v = live_prices.get(k, default)
+        if isinstance(v, dict):
+            return float(v.get("usd", default))
+        try:
+            return float(v)
+        except (ValueError, TypeError):
+            return default
     
     price_scale = 1.0
     current_p = 81000.0
     merged_breakdown = None
 
     if coin_id == "bitcoin":
-        current_p = live_prices.get("bitcoin", 81000.0)
+        current_p = _get_price("bitcoin", 81000.0)
         price_scale = current_p / 65000.0
     elif coin_id == "dogecoin_litecoin":
-        ltc_p = live_prices.get("litecoin", 65.0)
-        doge_p = live_prices.get("dogecoin", 0.085)
+        ltc_p = _get_price("litecoin", 65.0)
+        doge_p = _get_price("dogecoin", 0.085)
         price_scale = (0.75 * (doge_p / 0.12)) + (0.25 * (ltc_p / 70.0))
         
         # Desglose de Merged Mining AuxPoW (Scrypt global ~1.4 PH/s)
@@ -67,32 +76,38 @@ def calculate_miner_profitability(
             "doge_pct": round((doge_daily_usd / tot_scrypt_usd * 100.0) if tot_scrypt_usd > 0 else 75.0, 1)
         }
     elif coin_id == "kaspa":
-        current_p = live_prices.get("kaspa", 0.045)
+        current_p = _get_price("kaspa", 0.045)
         price_scale = current_p / 0.12
     elif coin_id == "alephium":
-        current_p = live_prices.get("alephium", 0.08)
+        current_p = _get_price("alephium", 0.08)
         price_scale = current_p / 1.50
     elif coin_id == "ravencoin":
-        current_p = live_prices.get("ravencoin", 0.0016)
+        current_p = _get_price("ravencoin", 0.0016)
         price_scale = current_p / 0.02
     elif coin_id == "ethereum-classic":
-        current_p = live_prices.get("ethereum-classic", 12.0)
+        current_p = _get_price("ethereum-classic", 12.0)
         price_scale = current_p / 20.0
     elif coin_id == "zcash":
-        current_p = live_prices.get("zcash", 1197.0)
+        current_p = _get_price("zcash", 1197.0)
         price_scale = current_p / 1197.0
     elif coin_id == "minotari":
-        current_p = live_prices.get("minotari", 0.0012)
+        current_p = _get_price("minotari", 0.0012)
         price_scale = current_p / 0.0012
     elif coin_id == "monero":
-        current_p = live_prices.get("monero", 600.0)
+        current_p = _get_price("monero", 600.0)
         price_scale = current_p / 600.0
     elif coin_id == "helium":
-        current_p = live_prices.get("helium", 0.41)
+        current_p = _get_price("helium", 0.41)
         price_scale = current_p / 0.41
     elif coin_id == "dash":
-        current_p = live_prices.get("dash", 28.5)
+        current_p = _get_price("dash", 28.5)
         price_scale = current_p / 28.5
+    elif coin_id == "pearl":
+        current_p = _get_price("pearl", 1.80)
+        price_scale = current_p / 1.80
+    elif coin_id in ("ai_compute", "ai_rental"):
+        current_p = _get_price("ai_compute", 1.0)
+        price_scale = 1.0
 
     # Cálculo del ingreso bruto diario
     if coin_id == "bitcoin" and use_first_principles_btc:
@@ -841,6 +856,10 @@ def calculate_shutdown_price(
         benchmark = 430.0
     elif coin_id == "dash":
         benchmark = 28.5
+    elif coin_id == "pearl":
+        benchmark = 1.80
+    elif coin_id in ("ai_compute", "ai_rental"):
+        benchmark = 1.0
 
     # Ingreso = base_rev * (price / benchmark) * 0.985 (pool fee)
     # En el breakeven: daily_power_cost_usd = base_rev * (shutdown_price / benchmark) * 0.985

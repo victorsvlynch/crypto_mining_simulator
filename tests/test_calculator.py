@@ -448,6 +448,69 @@ def test_profitability_calculations():
     assert abs(xt_sched["gross"]["monthly_pen"] - (xt_sched["gross"]["daily_pen"] * 30)) <= 0.10
     print("Test 12 (XT Box Solar Schedule 8h Solar / 16h Grid): PASSED")
 
+    # Test 13: Validación de ASUS PRIME GeForce RTX 5070 Ti 16GB OC (Pearl Mining & Alquiler IA)
+    from services.calculator import calculate_shutdown_price
+
+    rtx_pearl = next((m for m in HARDWARE_CATALOG if m["id"] == "asus_prime_rtx5070ti_pearl"), None)
+    assert rtx_pearl is not None, "ASUS RTX 5070 Ti Pearl debe estar en HARDWARE_CATALOG"
+    assert rtx_pearl["coin_id"] == "pearl"
+    assert rtx_pearl["power_watts"] == 210
+    assert rtx_pearl["hashrate"] == 182.0
+    assert "8960" in rtx_pearl["description"]
+    assert "PRIME-RTX5070TI-O16G" in rtx_pearl["description"]
+
+    rtx_ai = next((m for m in HARDWARE_CATALOG if m["id"] == "asus_prime_rtx5070ti_ai"), None)
+    assert rtx_ai is not None, "ASUS RTX 5070 Ti AI debe estar en HARDWARE_CATALOG"
+    assert rtx_ai["coin_id"] == "ai_compute"
+    assert rtx_ai["power_watts"] == 195
+    assert rtx_ai["hashrate"] == 105.0
+
+    rig_5070 = next((m for m in HARDWARE_CATALOG if m["id"] == "gpu_rig_6x_rtx5070ti_pearl_ai"), None)
+    assert rig_5070 is not None, "Rig 6x RTX 5070 Ti debe estar en HARDWARE_CATALOG"
+    assert rig_5070["power_watts"] == 1350
+    assert rig_5070["hashrate"] == 1092.0
+
+    # Simulación Pearl Mining
+    mock_prices_pearl = dict(mock_prices)
+    mock_prices_pearl["pearl"] = 1.80
+    calc_pearl = calculate_miner_profitability(
+        hardware=rtx_pearl,
+        live_prices=mock_prices_pearl,
+        tariff_pen_kwh=0.8528,
+        usd_to_pen=3.75,
+        pue=1.05
+    )
+    assert calc_pearl["daily_gross_usd"] > 4.0
+    assert calc_pearl["daily_power_cost_usd"] > 0
+    assert calc_pearl["daily_net_usd"] > 0, "RTX 5070 Ti debe ser rentable en Pearl incluso con tarifa BT5B"
+    assert calc_pearl["monthly_net_pen"] > 0
+
+    # Simulación Alquiler IA
+    mock_prices_ai = dict(mock_prices)
+    mock_prices_ai["ai_compute"] = 1.00
+    calc_ai = calculate_miner_profitability(
+        hardware=rtx_ai,
+        live_prices=mock_prices_ai,
+        tariff_pen_kwh=0.8528,
+        usd_to_pen=3.75,
+        pue=1.05
+    )
+    assert calc_ai["daily_gross_usd"] >= 5.0
+    assert calc_ai["daily_net_usd"] > calc_pearl["daily_net_usd"], "Alquiler IA tiene margen superior al minado en red residencial"
+
+    # Precio de apagado Pearl
+    sd_pearl = calculate_shutdown_price(
+        hardware=rtx_pearl,
+        live_price=1.80,
+        tariff_pen_kwh=0.8528,
+        usd_to_pen=3.75,
+        pue=1.05
+    )
+    assert sd_pearl["shutdown_price"] < 1.80
+    assert sd_pearl["safety_margin_pct"] > 0
+
+    print("Test 13 (ASUS PRIME RTX 5070 Ti 16GB OC Pearl e IA): PASSED")
+
 if __name__ == "__main__":
     test_profitability_calculations()
     print("Todas las pruebas pasaron satisfactoriamente.")

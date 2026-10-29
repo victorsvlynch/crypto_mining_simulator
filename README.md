@@ -204,6 +204,9 @@ El proyecto cuenta con una base de datos de hardware altamente detallada en [`da
 | 12 | **Bitmain Antminer L7 (9.05 GH/s)** | Bitmain | Scrypt | LTC + DOGE | 9.05 GH/s | 3260 W | ASIC Industrial |
 | 13 | **Rig GPU 6x Nvidia RTX 4090** | Ensamblado Personalizado | KawPow / Dynex / AI | RVN / AI Compute | 450.0 MH/s | 1850 W | Rig GPU Multi-Moneda |
 | 14 | **Rig GPU 6x Nvidia RTX 3080** | Ensamblado Personalizado | Etchash / KawPow | ETC / RVN | 280.0 MH/s | 1350 W | Rig GPU Multi-Moneda |
+| 15 | **ASUS PRIME GeForce RTX 5070 Ti 16GB OC (Pearl PRL Mining)** | ASUS | PearlHash (NoisyGEMM) | Pearl (PRL) | 182.0 Th/s | 210 W | GPU Gaming / Minería PoUW |
+| 16 | **ASUS PRIME GeForce RTX 5070 Ti 16GB OC (Alquiler IA: Vast.ai/Clore)** | ASUS | Cloud AI Compute | USD / AI Rental | 105.0 TFLOPS | 195 W | Servidor / GPU Host IA |
+| 17 | **Rig 6x ASUS PRIME RTX 5070 Ti 16GB OC (Cluster Pearl / IA)** | ASUS / Rig Ensamblado | PearlHash / AI Compute | PRL / AI USD | 1092.0 Th/s | 1350 W | Rig GPU Multi-Moneda / Granja IA |
 | 15 | **Bitmain Antminer AL1 Pro (16.6 TH/s)** | Bitmain | Blake3 | ALPH | 16.6 TH/s | 3730 W | ASIC Industrial |
 | 16 | **Bombax EZ100 (12.5 GH/s ETC + ZIL)** | Bombax | Etchash / Ethash | ETC + ZIL | 12500.0 MH/s | 2300 W | ASIC Industrial |
 | 17 | **Jasminer X16-Q (Hogar Silencioso 40dB)** | Jasminer | Etchash / Ethash | ETC + ZIL | 1950.0 MH/s | 620 W | Minero Doméstico Silencioso |
@@ -359,6 +362,25 @@ Crypto_Mining_Simulator/
 ```
 
 ---
+
+### 8. 🎮 GPU de Última Generación: ASUS PRIME GeForce RTX 5070 Ti 16GB OC (PRIME-RTX5070TI-O16G)
+Incorporación completa del modelo de arquitectura **NVIDIA Blackwell**:
+- **Especificaciones Técnicas Oficiales:**
+  - **GPU:** NVIDIA GeForce RTX 5070 Ti (GB203, TSMC 4N).
+  - **CUDA Cores:** 8,960 | **Tensor Cores:** 280 (5ta generación FP8/FP4).
+  - **VRAM:** 16 GB GDDR7 a 28 Gbps con bus de 256-bit (**896 GB/s** de ancho de banda).
+  - **Salidas de Video:** 1x HDMI 2.1b, 3x DisplayPort 2.1b.
+  - **Consumo y Refrigeración:** TDP stock 300W (optimizado a 195W - 210W en minería/IA), triple ventilador Axial-Tech silencioso (36 dB) con modo 0dB.
+- **Estrategia A: Minería PoUW de Pearl (PRL):**
+  - Algoritmo **PearlHash / NoisyGEMM** (multiplicación de matrices densas de entrenamiento de IA).
+  - Hashrate estimado de **~182.0 Th/s** a **210W** (~$4.15 USD brutos/día).
+  - Software compatible: *SRBMiner-MULTI*, *BzMiner*, *WildRig Multi* o *HiveOS*.
+- **Estrategia B: Alquiler de Cómputo para IA (Cloud Hosting):**
+  - Plataformas: *Vast.ai*, *Clore.ai*, *RunPod*, *io.net*.
+  - Despliegue de modelos LLM 7B-9B (Llama-3.1 8B, Gemma 2 9B), FLUX.1 Schnell, SDXL y endpoints vLLM.
+  - Retorno proyectado: **$0.22 - $0.28 USD/hora** (~$5.20 USD brutos/día con 85% de ocupación).
+- **Compatibilidad Eléctrica en Casa Grande (Hidrandina BT5B):**
+  - Al consumir solo 210W (0.95A en 220V), es 100% segura para operar en el medidor residencial estándar de 1.0 kW sin riesgo de corte por sobrecorriente.
 
 ## 🛠️ Instalación y Puesta en Marcha
 

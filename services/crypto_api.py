@@ -24,14 +24,16 @@ DEFAULT_PRICES = {
     "monero": {"usd": 600.0, "symbol": "XMR", "name": "Monero"},
     "helium": {"usd": 0.41, "symbol": "HNT", "name": "Helium"},
     "bitcoin-cash": {"usd": 430.0, "symbol": "BCH", "name": "Bitcoin Cash"},
-    "dash": {"usd": 28.5, "symbol": "DASH", "name": "Dash"}
+    "dash": {"usd": 28.5, "symbol": "DASH", "name": "Dash"},
+    "pearl": {"usd": 1.80, "symbol": "PRL", "name": "Pearl"},
+    "ai_compute": {"usd": 1.00, "symbol": "USD", "name": "AI Cloud Compute"}
 }
 
 DEFAULT_USD_PEN = 3.75
 
 
 def _fetch_from_coingecko() -> Dict[str, float]:
-    ids = "bitcoin,litecoin,dogecoin,kaspa,alephium,ravencoin,ethereum-classic,zcash,minotari,monero,helium,bitcoin-cash,dash"
+    ids = "bitcoin,litecoin,dogecoin,kaspa,alephium,ravencoin,ethereum-classic,zcash,minotari,monero,helium,bitcoin-cash,dash,pearl"
     url = f"https://api.coingecko.com/api/v3/simple/price?ids={ids}&vs_currencies=usd"
     req = urllib.request.Request(
         url,
