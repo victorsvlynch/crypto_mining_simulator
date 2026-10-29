@@ -510,6 +510,76 @@ def test_profitability_calculations():
     assert sd_pearl["safety_margin_pct"] > 0
 
     print("Test 13 (ASUS PRIME RTX 5070 Ti 16GB OC Pearl e IA): PASSED")
+    # Test 14: Validación de NVIDIA GeForce RTX 5060 Ti 8GB (Pearl Mining & Alquiler IA)
+    rtx5060_pearl = next((m for m in HARDWARE_CATALOG if m["id"] == "nvidia_rtx5060ti_8gb_pearl"), None)
+    assert rtx5060_pearl is not None, "NVIDIA RTX 5060 Ti Pearl debe estar en HARDWARE_CATALOG"
+    assert rtx5060_pearl["coin_id"] == "pearl"
+    assert rtx5060_pearl["power_watts"] == 115
+    assert rtx5060_pearl["hashrate"] == 94.0
+    assert "4608" in rtx5060_pearl["description"]
+    assert "8GB GDDR7" in rtx5060_pearl["description"]
+
+    rtx5060_ai = next((m for m in HARDWARE_CATALOG if m["id"] == "nvidia_rtx5060ti_8gb_ai"), None)
+    assert rtx5060_ai is not None, "NVIDIA RTX 5060 Ti AI debe estar en HARDWARE_CATALOG"
+    assert rtx5060_ai["coin_id"] == "ai_compute"
+    assert rtx5060_ai["power_watts"] == 110
+    assert rtx5060_ai["hashrate"] == 54.0
+
+    rig_5060 = next((m for m in HARDWARE_CATALOG if m["id"] == "gpu_rig_6x_rtx5060ti_pearl_ai"), None)
+    assert rig_5060 is not None, "Rig 6x RTX 5060 Ti debe estar en HARDWARE_CATALOG"
+    assert rig_5060["power_watts"] == 750
+    assert rig_5060["hashrate"] == 564.0
+
+    # Simulación Pearl Mining 5060 Ti
+    calc_5060_pearl = calculate_miner_profitability(
+        hardware=rtx5060_pearl,
+        live_prices=mock_prices_pearl,
+        tariff_pen_kwh=0.8528,
+        usd_to_pen=3.75,
+        pue=1.05
+    )
+    assert calc_5060_pearl["daily_gross_usd"] > 2.0
+    assert calc_5060_pearl["daily_power_cost_usd"] > 0
+    assert calc_5060_pearl["daily_net_usd"] > 0, "RTX 5060 Ti debe ser rentable en Pearl con tarifa BT5B"
+    assert calc_5060_pearl["monthly_net_pen"] > 0
+
+    # Simulación Alquiler IA 5060 Ti
+    calc_5060_ai = calculate_miner_profitability(
+        hardware=rtx5060_ai,
+        live_prices=mock_prices_ai,
+        tariff_pen_kwh=0.8528,
+        usd_to_pen=3.75,
+        pue=1.05
+    )
+    assert calc_5060_ai["daily_gross_usd"] >= 2.5
+    assert calc_5060_ai["daily_net_usd"] > 0
+    assert calc_5060_ai["monthly_net_pen"] > 0
+
+    # Simulación Rig 6x 5060 Ti
+    calc_rig_5060 = calculate_miner_profitability(
+        hardware=rig_5060,
+        live_prices=mock_prices_pearl,
+        tariff_pen_kwh=0.8528,
+        usd_to_pen=3.75,
+        pue=1.05
+    )
+    assert calc_rig_5060["daily_gross_usd"] > 12.0
+    assert calc_rig_5060["daily_net_usd"] > 0
+    assert calc_rig_5060["monthly_net_pen"] > 0
+
+    # Precio de apagado Pearl 5060 Ti
+    sd_5060_pearl = calculate_shutdown_price(
+        hardware=rtx5060_pearl,
+        live_price=1.80,
+        tariff_pen_kwh=0.8528,
+        usd_to_pen=3.75,
+        pue=1.05
+    )
+    assert sd_5060_pearl["shutdown_price"] < 1.80
+    assert sd_5060_pearl["safety_margin_pct"] > 0
+
+    print("Test 14 (NVIDIA GeForce RTX 5060 Ti 8GB Pearl e IA): PASSED")
+
 
 if __name__ == "__main__":
     test_profitability_calculations()

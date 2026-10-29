@@ -5,7 +5,7 @@
 [![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)](.github/workflows/ci.yml)
 [![SemVer](https://img.shields.io/badge/Semantic%20Release-Automated-brightgreen?style=for-the-badge)](.github/workflows/release.yml)
-[![Tests](https://img.shields.io/badge/Tests-9%2F9%20Passing-success?style=for-the-badge&logo=pytest&logoColor=white)](tests/test_calculator.py)
+[![Tests](https://img.shields.io/badge/Tests-14%2F14%20Passing-success?style=for-the-badge&logo=pytest&logoColor=white)](tests/test_calculator.py)
 [![Region](https://img.shields.io/badge/Regi%C3%B3n-Valle%20Chicama%20%7C%20Per%C3%BA-red?style=for-the-badge)](https://es.wikipedia.org/wiki/Casa_Grande_(Per%C3%BA))
 
 Simulador técnico, financiero, probabilístico y de ingeniería eléctrica para minería de criptomonedas desarrollado en **Streamlit** y empaquetado en **Docker**. Diseñado con rigor para la realidad energética de **Casa Grande (Provincia de Ascope, Región La Libertad, Perú)**, integrando los pliegos tarifarios oficiales y reales de **Hidrandina S.A.** (Grupo Distriluz), el recurso solar fotovoltaico del Valle Chicama y las exigencias térmicas de la costa norte peruana.
@@ -207,6 +207,9 @@ El proyecto cuenta con una base de datos de hardware altamente detallada en [`da
 | 15 | **ASUS PRIME GeForce RTX 5070 Ti 16GB OC (Pearl PRL Mining)** | ASUS | PearlHash (NoisyGEMM) | Pearl (PRL) | 182.0 Th/s | 210 W | GPU Gaming / Minería PoUW |
 | 16 | **ASUS PRIME GeForce RTX 5070 Ti 16GB OC (Alquiler IA: Vast.ai/Clore)** | ASUS | Cloud AI Compute | USD / AI Rental | 105.0 TFLOPS | 195 W | Servidor / GPU Host IA |
 | 17 | **Rig 6x ASUS PRIME RTX 5070 Ti 16GB OC (Cluster Pearl / IA)** | ASUS / Rig Ensamblado | PearlHash / AI Compute | PRL / AI USD | 1092.0 Th/s | 1350 W | Rig GPU Multi-Moneda / Granja IA |
+| 18 | **NVIDIA GeForce RTX 5060 Ti 8GB (Pearl PRL Mining)** | NVIDIA / ASUS | PearlHash (NoisyGEMM) | Pearl (PRL) | 94.0 Th/s | 115 W | GPU Gaming / Minería PoUW |
+| 19 | **NVIDIA GeForce RTX 5060 Ti 8GB (Alquiler IA: Vast.ai/Clore)** | NVIDIA / ASUS | Cloud AI Compute | USD / AI Rental | 54.0 TFLOPS | 110 W | Servidor / GPU Host IA |
+| 20 | **Rig 6x NVIDIA RTX 5060 Ti 8GB (Cluster Pearl / IA)** | NVIDIA / Rig Ensamblado | PearlHash / AI Compute | PRL / AI USD | 564.0 Th/s | 750 W | Rig GPU Multi-Moneda / Granja IA |
 | 15 | **Bitmain Antminer AL1 Pro (16.6 TH/s)** | Bitmain | Blake3 | ALPH | 16.6 TH/s | 3730 W | ASIC Industrial |
 | 16 | **Bombax EZ100 (12.5 GH/s ETC + ZIL)** | Bombax | Etchash / Ethash | ETC + ZIL | 12500.0 MH/s | 2300 W | ASIC Industrial |
 | 17 | **Jasminer X16-Q (Hogar Silencioso 40dB)** | Jasminer | Etchash / Ethash | ETC + ZIL | 1950.0 MH/s | 620 W | Minero Doméstico Silencioso |
@@ -363,7 +366,30 @@ Crypto_Mining_Simulator/
 
 ---
 
-### 8. 🎮 GPU de Última Generación: ASUS PRIME GeForce RTX 5070 Ti 16GB OC (PRIME-RTX5070TI-O16G)
+### 8. 🎮 GPUs de Última Generación NVIDIA Serie 50 (Blackwell): RTX 5070 Ti 16GB y RTX 5060 Ti 8GB
+
+#### ⚡ Nuevo Modelo: NVIDIA GeForce RTX 5060 Ti 8GB GDDR7 (Blackwell GB206)
+Incorporación completa del modelo de alta eficiencia para minería y computación de IA:
+- **Especificaciones Técnicas Oficiales:**
+  - **GPU:** NVIDIA GeForce RTX 5060 Ti (GB206, TSMC 4N).
+  - **CUDA Cores:** 4,608 | **Tensor Cores:** 144 (5ta generación FP8/FP4).
+  - **VRAM:** 8 GB GDDR7 a 28 Gbps con bus de 128-bit (**448 GB/s** de ancho de banda).
+  - **Salidas de Video:** 1x HDMI 2.1b, 3x DisplayPort 2.1b.
+  - **Consumo y Refrigeración:** TDP stock 160W (optimizado a **110W - 115W** en minería/IA), ventiladores axiales silenciosos (**33 dB**) con modo 0dB en reposo.
+- **Estrategia A: Minería PoUW de Pearl (PRL):**
+  - Algoritmo **PearlHash / NoisyGEMM** (multiplicación tensorial acelerada).
+  - Hashrate estimado de **~94.0 Th/s** consumiendo solo **115W** (~$2.15 USD brutos/día).
+  - Costo de luz en Casa Grande (BT5B S/ 0.8528/kWh): apenas **S/ 2.47 / día** (~$0.66 USD), generando una ganancia líquida de **~S/ 5.60 PEN / día** (~**S/ 168.00 PEN / mes**).
+- **Estrategia B: Alquiler de Cómputo para IA (Cloud Hosting: Vast.ai / Clore.ai / RunPod):**
+  - Plataformas: *Vast.ai*, *Clore.ai*, *RunPod*, *io.net*.
+  - Cargas de Trabajo: Inferencia ultra rápida de LLMs ligeros y cuantizados FP8/FP4 (Llama-3.2 1B y 3B, Mistral 7B Q4, Phi-3.5), transcripción OpenAI Whisper Large-v3 y generación SD 1.5/SDXL Turbo.
+  - Retorno proyectado: **$0.11 - $0.14 USD/hora** (~$2.70 USD brutos/día con 85% de ocupación). Consumo: **110W** (~$0.63 USD/día de luz), dejando una ganancia neta de **~S/ 7.75 PEN / día** (~**S/ 232.00 PEN / mes**).
+- **Compatibilidad Eléctrica en Casa Grande (Hidrandina BT5B):**
+  - Al consumir solo 115W (**0.52 Amperios en 220V**), ocupa apenas el **11.5%** de la capacidad del medidor residencial estándar de 1.0 kW de Hidrandina en Casa Grande, operando con margen térmico y eléctrico absoluto sin requerir ampliación de acometida.
+
+---
+
+### 8.1. 🎮 ASUS PRIME GeForce RTX 5070 Ti 16GB OC (PRIME-RTX5070TI-O16G)
 Incorporación completa del modelo de arquitectura **NVIDIA Blackwell**:
 - **Especificaciones Técnicas Oficiales:**
   - **GPU:** NVIDIA GeForce RTX 5070 Ti (GB203, TSMC 4N).

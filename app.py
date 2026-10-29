@@ -314,7 +314,7 @@ with tab_ranking:
     with col_s1:
         search_query = st.text_input(
             "🔍 Buscar por modelo, fabricante, chip o moneda:",
-            placeholder="Ej: RTX 5070 Ti, Pearl, AI, ASUS, NerdQaxe, LV08, BM1370, Bitmain, Z15, Kaspa, Bitaxe..."
+            placeholder="Ej: RTX 5060 Ti, RTX 5070 Ti, Pearl, AI, ASUS, NerdQaxe, LV08, BM1370, Bitmain, Z15, Kaspa, Bitaxe..."
         ).strip().lower()
 
     all_manufacturers = sorted(list({m.get("manufacturer", "Otro") for m in HARDWARE_CATALOG if m.get("manufacturer")}))
@@ -645,8 +645,40 @@ with tab_simulator:
         sc4.markdown(f"**Costo de Hardware:** ${sim_res['hardware_cost_usd']:,} USD")
         sc4.markdown(f"**Inversión en Soles:** S/ {sim_res['hardware_cost_pen']:,.2f}")
 
-    # Guía Especializada si se selecciona una GPU RTX 5070 Ti, Pearl o Alquiler IA
-    if "5070" in sim_res.get("id", "") or sim_res.get("coin_id") in ("pearl", "ai_compute"):
+    # Guía Especializada si se selecciona una GPU RTX Serie 50 (RTX 5060 Ti / RTX 5070 Ti), Pearl o Alquiler IA
+    if "5060" in sim_res.get("id", ""):
+        with st.expander("💡 Guía Especializada: NVIDIA GeForce RTX 5060 Ti 8GB GDDR7 | Minería Pearl (PRL) y Alquiler IA", expanded=True):
+            st.markdown(
+                """
+                ### 🚀 Tarjeta Gráfica NVIDIA GeForce RTX 5060 Ti 8GB GDDR7 (Arquitectura Blackwell)
+                * **Arquitectura:** NVIDIA Blackwell (GB206, TSMC 4N) &bull; **4,608 Núcleos CUDA** &bull; 144 Tensor Cores (FP8/FP4).
+                * **Memoria VRAM:** **8 GB GDDR7** de 28 Gbps con bus de 128-bit (**448 GB/s** de ancho de banda ultrarrápido).
+                * **Conectividad y Refrigeración:** 1x HDMI 2.1b, 3x DisplayPort 2.1b, disipador dual axial silencioso (32 - 34 dB) con modo 0dB en reposo.
+                * **Alimentación:** 1x 8-pin PCIe o 12V-2x6 &bull; TDP Stock 160W &bull; Consumo en minería/IA optimizada: **~110W - 115W (0.52A en 220V)**.
+                
+                ---
+                #### ⛏️ Opción A: Minería PoUW de Pearl (PRL)
+                * **Algoritmo PearlHash:** Basado en `NoisyGEMM` (multiplicación de matrices tensoriales densas) diseñado para reflejar el cómputo de redes neuronales.
+                * **Hashrate Estimado:** **~94.0 Th/s** consumiendo solo **115 Watts** con perfil undervolt (Power Limit al 70%, Memoria +1000 MHz).
+                * **Software Compatible:** *SRBMiner-MULTI*, *BzMiner*, *WildRig Multi* o *HiveOS / SimpleMining*.
+                * **Ingreso y Rentabilidad:** ~**$2.15 USD / día** brutos (~1.19 PRL/día). Costo de luz en Casa Grande (BT5B S/ 0.8528/kWh): apenas **S/ 2.47 / día** (~$0.66 USD). ¡Utilidad líquida de **~S/ 5.60 PEN / día** (~**S/ 168.00 PEN / mes**)!
+                * **Ventaja:** Acumulación directa de Pearl (PRL) descentralizada sin intermediarios ni contratos SLA.
+
+                ---
+                #### 🤖 Opción B: Alquiler de Cómputo para Inteligencia Artificial (Cloud GPU Hosting)
+                * **Plataformas de Alquiler:** *Vast.ai*, *Clore.ai*, *RunPod*, *io.net*.
+                * **Cargas de Trabajo Ideales:** Inferencia rápida de LLMs ligeros y cuantizados FP8/FP4 (Llama-3.2 1B y 3B, Mistral 7B Q4, Phi-3.5), microservicios *vLLM / Ollama*, transcripción de audio *OpenAI Whisper Large-v3* en tiempo real, generación con *Stable Diffusion 1.5* y *SDXL Turbo*.
+                * **Tarifa de Mercado:** **$0.11 a $0.14 USD / hora** (~$2.70 USD brutos por día con 85% de ocupación).
+                * **Rentabilidad:** Consumo de solo **110W** (~$0.63 USD/día de luz). Deja una ganancia neta de **~S/ 7.75 PEN / día** (~**S/ 232.00 PEN / mes**).
+                * **Ventaja:** Ingresos en USD o USDT estables con alta resiliencia frente a la volatilidad del mercado crypto.
+
+                ---
+                #### ⚡ Viabilidad Eléctrica en Casa Grande (Hidrandina)
+                * Con solo **115 Watts** (0.52 Amperios en 220V), representa apenas el **11.5%** de la potencia del medidor residencial estándar de 1.0 kW de Hidrandina en Casa Grande.
+                * **Riesgo térmico y acústico nulo:** 33 dB es ultrasilencioso (nivel de biblioteca), sin necesidad de cabina insonorizada ni ventilación industrial.
+                """
+            )
+    elif "5070" in sim_res.get("id", "") or sim_res.get("coin_id") in ("pearl", "ai_compute"):
         with st.expander("💡 Guía Especializada: ASUS PRIME GeForce RTX 5070 Ti 16GB OC (PRIME-RTX5070TI-O16G) | Pearl & IA", expanded=True):
             st.markdown(
                 """
